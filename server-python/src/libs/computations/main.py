@@ -1,0 +1,167 @@
+import math
+from functools import cache
+from typing import Tuple
+
+import matplotlib.pyplot as plt
+import numpy as np
+from libs.computations.gradient import compute_gradient
+from libs.computations.laplace import (
+    BoundaryConditionData,
+    BoundaryConditionType,
+    BoundaryOrientation,
+    DiscretePlanePartition,
+    LaplaceSolver,
+)
+
+
+def ring_condition(x: float, y: float) -> Tuple[float, bool]:
+    # Center of ring is at (x, y) = (15, 10)
+    center_x = 15
+    center_y = 10
+
+    inner_radius = 3
+    outer_radius = 6
+    potential = 7.35
+
+    distance = math.sqrt((center_x - x) ** 2 + (center_y - y) ** 2)
+    if distance >= inner_radius and distance <= outer_radius:
+        return potential, True
+    return 0, False
+
+
+def arrow_condition(x: float, y: float) -> Tuple[float, bool]:
+    # Center of arrow is at (x, y) = (15, 10)
+    center_x = 15
+    center_y = 10
+
+    h = 6
+    l = 8
+    assert l > h
+    potential = 7.35
+
+    relative_x = x - center_x
+    relative_y = y - center_y
+
+    # Central rect
+    central_rect_length = l - h
+    in_central_rect_x = -(central_rect_length / 2) <= relative_x <= (central_rect_length / 2)
+    in_central_rect_y = -(h / 2) <= relative_y <= (h / 2)
+    in_central_rect = in_central_rect_x and in_central_rect_y
+
+    # Left triangle
+    in_left_x = -(l / 2) <= relative_x <= -(central_rect_length / 2)
+    in_left_upper = relative_y <= (l / 2) + relative_x
+    in_left_lower = relative_y >= -(l / 2) - relative_x
+    in_left = in_left_x and in_left_upper and in_left_lower
+
+    # Right triangle
+    in_right_x = (central_rect_length / 2) <= relative_x <= (l / 2)
+    in_right_y = -(h / 2) <= relative_y <= (h / 2)
+    in_right_upper = relative_y >= -(central_rect_length) / 2 + relative_x
+    in_right_lower = relative_y <= (central_rect_length) / 2 - relative_x
+    in_right = in_right_x and in_right_y and (in_right_upper or in_right_lower)
+
+    in_arrow = in_central_rect or in_left or in_right
+    if in_arrow:
+        return potential, True
+
+    return 0, False
+
+
+def electrode_condition(x: float, y: float) -> float:
+    ELECTRODE_Y_LOWER = 3
+    ELECTRODE_Y_UPPER = 17
+
+    # potential = -0.29
+    potential = 46
+
+    if ELECTRODE_Y_LOWER <= y <= ELECTRODE_Y_UPPER:
+        return potential
+    return 0
+
+
+def zero_neumann_vertical(x: float, y: float) -> float:
+    return 0.0  # The derivative value we want (∂f/∂n = 0)
+
+
+def _plot_solution(self, u: np.ndarray, title: str):
+    """Create a heat map visualization of the solution."""
+    plt.figure(figsize=(10, 8))
+
+    # Create grid coordinates
+    x = np.linspace(self.partition.x0, self.partition.x0 + self.partition.n * self.partition.h, self.partition.n + 1)
+    y = np.linspace(self.partition.y0, self.partition.y0 + self.partition.m * self.partition.k, self.partition.m + 1)
+    X, Y = np.meshgrid(x, y)
+
+    # Plot heat map
+    clipped = np.clip(u.T, 0, 30)
+    heatmap = plt.pcolormesh(X, Y, clipped, shading="auto")
+    plt.colorbar(heatmap, label="Solution Value")
+
+    # Add title and labels
+    plt.title(title)
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.axis("equal")  # Одинаковый масштаб по осям
+
+    # Save to file
+    plt.savefig(f"tmp/{title}.png")  # Saves in current directory
+    plt.close()  # Close the figure to free memory
+
+    # plt.show(block=False)
+
+
+if __name__ == "__main__":
+    # Partition
+    WIDTH = 30  # cm
+    HEIGHT = 20  # cm
+    STEP = 0.2  # cm
+
+    partition = DiscretePlanePartition(0, STEP, int(WIDTH // STEP), 0, STEP, int(HEIGHT // STEP))
+
+    # Setup solver
+    solver = LaplaceSolver(partition)
+
+    # Internal conditions
+    solver.add_internal_condition(ring_condition)
+    # solver.add_internal_condition(arrow_condition)
+
+    # Boudndary conditions
+    solver.add_boundary_condition(
+        BoundaryOrientation.TOP,
+        BoundaryConditionData(
+            BoundaryConditionType.NEUMANN,
+            zero_neumann_vertical,
+        ),
+    )
+
+    solver.add_boundary_condition(
+        BoundaryOrientation.BOTTOM,
+        BoundaryConditionData(
+            BoundaryConditionType.NEUMANN,
+            zero_neumann_vertical,
+        ),
+    )
+
+    solver.add_boundary_condition(
+        BoundaryOrientation.LEFT,
+        BoundaryConditionData(
+            BoundaryConditionType.DIRICHLET,
+            electrode_condition,
+        ),
+    )
+
+    solver.add_boundary_condition(
+        BoundaryOrientation.RIGHT,
+        BoundaryConditionData(
+            BoundaryConditionType.DIRICHLET,
+            electrode_condition,
+        ),
+    )
+
+    # Solve
+    potential = solver.solve(tolerance=1e-5)
+    # potential = solver.solve_sle()
+    electric_field = -compute_gradient(potential, STEP, STEP)
+
+    _plot_solution(solver, electric_field, title="electric_field")

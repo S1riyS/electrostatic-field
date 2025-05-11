@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "physics-project"
+version = "0.1.0"
+description = ""
+authors = ["Kirill Ankudinov <kirill.ankudinov.94@mail.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = {extras = ["standard"], version = "^0.115.12"}
+numpy = "^2.2.5"
+scipy = "^1.15.3"
+
+
+[tool.poetry.group.dev.dependencies]
+matplotlib = "^3.10.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+mypy_path = "src"
+explicit_package_bases = true
+strict = true
+disallow_untyped_calls = false
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

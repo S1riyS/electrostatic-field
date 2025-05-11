@@ -1,3 +1,7 @@
 {
-  "prettier.configPath": "client/.prettierrc"
+  // Client
+  "prettier.configPath": "client/.prettierrc",
+
+  // Server
+  "python.analysis.extraPaths": ["server-python/src"]
 }
