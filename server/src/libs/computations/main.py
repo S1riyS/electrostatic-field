@@ -9,8 +9,12 @@ from libs.computations.laplace import (
     BoundaryConditionType,
     BoundaryOrientation,
     DiscretePlanePartition,
+    InternalCondition2D,
     LaplaceSolver,
 )
+from libs.shapes.arrow import Arrow
+from libs.shapes.core.shape import Shape
+from libs.shapes.ring import Ring
 
 
 def ring_condition(x: float, y: float) -> Tuple[float, bool]:
@@ -67,7 +71,24 @@ def arrow_condition(x: float, y: float) -> Tuple[float, bool]:
     return 0, False
 
 
+def generate_internal_condition(shape: Shape, potential: float) -> InternalCondition2D:
+    def cond(x: float, y: float) -> Tuple[float, bool]:
+        is_inside_shape = shape.check_point(x, y)
+        if is_inside_shape:
+            value = potential
+        else:
+            value = 0
+
+        return value, is_inside_shape
+
+    return cond
+
+
 def left_electrode_condition(y: float) -> float:
+    return 0
+
+
+def right_electrode_condition(y: float) -> float:
     ELECTRODE_Y_LOWER = 3
     ELECTRODE_Y_UPPER = 17
 
@@ -76,10 +97,6 @@ def left_electrode_condition(y: float) -> float:
     if ELECTRODE_Y_LOWER <= y <= ELECTRODE_Y_UPPER:
         return potential
 
-    return 0
-
-
-def right_electrode_condition(y: float) -> float:
     return 0
 
 
@@ -124,8 +141,8 @@ if __name__ == "__main__":
     WIDTH = 30  # cm
     HEIGHT = 20  # cm
 
-    NX = 500
-    NY = 500
+    NX = 750
+    NY = 750
 
     partition = DiscretePlanePartition(WIDTH, NX, HEIGHT, NY)
 
@@ -133,8 +150,15 @@ if __name__ == "__main__":
     solver = LaplaceSolver(partition)
 
     # Internal conditions
-    # solver.add_internal_condition(ring_condition)
-    solver.add_internal_condition(arrow_condition)
+    arrow = Arrow(WIDTH / 2, HEIGHT / 2, height=2, length=4)
+    ring = Ring(WIDTH / 2, HEIGHT / 2, inner_radius=3, outer_radius=6)
+    shape_potential = 7.35
+
+    shape_condition_ring = generate_internal_condition(ring, shape_potential)
+    solver.add_internal_condition(shape_condition_ring)
+
+    # shape_condition_arrow = generate_internal_condition(arrow, shape_potential)
+    # solver.add_internal_condition(shape_condition_arrow)
 
     # Boudndary conditions
     solver.add_boundary_condition(
