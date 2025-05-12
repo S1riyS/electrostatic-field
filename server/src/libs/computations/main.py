@@ -1,10 +1,9 @@
 import math
-from functools import cache
 from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
-from libs.computations.gradient import compute_gradient
+from libs.computations.gradient import gradient_magnitude
 from libs.computations.laplace import (
     BoundaryConditionData,
     BoundaryConditionType,
@@ -68,34 +67,43 @@ def arrow_condition(x: float, y: float) -> Tuple[float, bool]:
     return 0, False
 
 
-def electrode_condition(x: float, y: float) -> float:
+def left_electrode_condition(y: float) -> float:
     ELECTRODE_Y_LOWER = 3
     ELECTRODE_Y_UPPER = 17
 
-    # potential = -0.29
-    potential = 46
+    potential = 14  # Из методички - 14 [В]
 
     if ELECTRODE_Y_LOWER <= y <= ELECTRODE_Y_UPPER:
         return potential
+
     return 0
 
 
-def zero_neumann_vertical(x: float, y: float) -> float:
+def right_electrode_condition(y: float) -> float:
+    return 0
+
+
+def zero_neumann(x: float, y: float) -> float:
     return 0.0  # The derivative value we want (∂f/∂n = 0)
 
 
-def _plot_solution(self, u: np.ndarray, title: str):
+def zero_dirichlet(_: float) -> float:
+    return 0
+
+
+def _plot_solution(self: LaplaceSolver, u: np.ndarray, title: str):
     """Create a heat map visualization of the solution."""
     plt.figure(figsize=(10, 8))
 
     # Create grid coordinates
-    x = np.linspace(self.partition.x0, self.partition.x0 + self.partition.n * self.partition.h, self.partition.n + 1)
-    y = np.linspace(self.partition.y0, self.partition.y0 + self.partition.m * self.partition.k, self.partition.m + 1)
+    x = np.linspace(0, self.partition.Lx, self.partition.Nx)
+    y = np.linspace(0, self.partition.Ly, self.partition.Ny)
     X, Y = np.meshgrid(x, y)
 
     # Plot heat map
-    clipped = np.clip(u.T, 0, 30)
-    heatmap = plt.pcolormesh(X, Y, clipped, shading="auto")
+    # clipped = np.clip(u.T, 0, 30)
+    # heatmap = plt.pcolormesh(X, Y, clipped, shading="auto")
+    heatmap = plt.pcolormesh(X, Y, u, shading="auto")
     plt.colorbar(heatmap, label="Solution Value")
 
     # Add title and labels
@@ -115,31 +123,33 @@ if __name__ == "__main__":
     # Partition
     WIDTH = 30  # cm
     HEIGHT = 20  # cm
-    STEP = 0.2  # cm
 
-    partition = DiscretePlanePartition(0, STEP, int(WIDTH // STEP), 0, STEP, int(HEIGHT // STEP))
+    NX = 500
+    NY = 500
+
+    partition = DiscretePlanePartition(WIDTH, NX, HEIGHT, NY)
 
     # Setup solver
     solver = LaplaceSolver(partition)
 
     # Internal conditions
-    solver.add_internal_condition(ring_condition)
-    # solver.add_internal_condition(arrow_condition)
+    # solver.add_internal_condition(ring_condition)
+    solver.add_internal_condition(arrow_condition)
 
     # Boudndary conditions
     solver.add_boundary_condition(
         BoundaryOrientation.TOP,
         BoundaryConditionData(
-            BoundaryConditionType.NEUMANN,
-            zero_neumann_vertical,
+            BoundaryConditionType.DIRICHLET,
+            zero_dirichlet,
         ),
     )
 
     solver.add_boundary_condition(
         BoundaryOrientation.BOTTOM,
         BoundaryConditionData(
-            BoundaryConditionType.NEUMANN,
-            zero_neumann_vertical,
+            BoundaryConditionType.DIRICHLET,
+            zero_dirichlet,
         ),
     )
 
@@ -147,7 +157,7 @@ if __name__ == "__main__":
         BoundaryOrientation.LEFT,
         BoundaryConditionData(
             BoundaryConditionType.DIRICHLET,
-            electrode_condition,
+            left_electrode_condition,
         ),
     )
 
@@ -155,13 +165,16 @@ if __name__ == "__main__":
         BoundaryOrientation.RIGHT,
         BoundaryConditionData(
             BoundaryConditionType.DIRICHLET,
-            electrode_condition,
+            right_electrode_condition,
         ),
     )
 
     # Solve
-    potential = solver.solve(tolerance=1e-5)
-    # potential = solver.solve_sle()
-    electric_field = -compute_gradient(potential, STEP, STEP)
+    # potential = solver.solve(tolerance=1e-5)
+    potential = solver.solve()
+    print(f"Potential: min={np.min(potential)}, max={np.max(potential)}")
+    _plot_solution(solver, potential, title="potential")
 
-    _plot_solution(solver, electric_field, title="electric_field")
+    electric_field = gradient_magnitude(potential, WIDTH / NX, WIDTH / NY)
+    print(f"Electric field: min={np.min(electric_field)}, max={np.max(electric_field)}")
+    _plot_solution(solver, np.log1p(electric_field), title="electric_field")
