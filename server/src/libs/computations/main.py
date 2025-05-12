@@ -150,15 +150,15 @@ if __name__ == "__main__":
     solver = LaplaceSolver(partition)
 
     # Internal conditions
-    arrow = Arrow(WIDTH / 2, HEIGHT / 2, height=2, length=4)
+    arrow = Arrow(WIDTH / 2, HEIGHT / 2, height=6, length=8, angle=math.pi / 4)
     ring = Ring(WIDTH / 2, HEIGHT / 2, inner_radius=3, outer_radius=6)
     shape_potential = 7.35
 
-    shape_condition_ring = generate_internal_condition(ring, shape_potential)
-    solver.add_internal_condition(shape_condition_ring)
+    # shape_condition_ring = generate_internal_condition(ring, shape_potential)
+    # solver.add_internal_condition(shape_condition_ring)
 
-    # shape_condition_arrow = generate_internal_condition(arrow, shape_potential)
-    # solver.add_internal_condition(shape_condition_arrow)
+    shape_condition_arrow = generate_internal_condition(arrow, shape_potential)
+    solver.add_internal_condition(shape_condition_arrow)
 
     # Boudndary conditions
     solver.add_boundary_condition(

@@ -1,16 +1,31 @@
+import math
+
 from libs.shapes.core.shape import Shape
 
 
 class Arrow(Shape):
-    def __init__(self, x: float, y: float, height: float, length: float):
+    def __init__(self, x: float, y: float, height: float, length: float, angle: float = 0):
         super().__init__(x, y)
         self.height = height
         self.length = length
+        self.angle = angle
+
+    def _rotate_point(self, x: float, y: float) -> tuple:
+        """Rotates point A(x, y) relative to center of shape on angle self.angle"""
+        # Relative coords
+        translated_x = x - self.x
+        translated_y = y - self.y
+
+        # Rotate
+        cos_a = math.cos(-self.angle)
+        sin_a = math.sin(-self.angle)
+        rotated_x = translated_x * cos_a - translated_y * sin_a
+        rotated_y = translated_x * sin_a + translated_y * cos_a
+
+        return rotated_x, rotated_y
 
     def check_point(self, x: float, y: float) -> bool:
-        # Relative to "central point" of shape at (self.x, self.y)
-        relative_x = x - self.x
-        relative_y = y - self.y
+        relative_x, relative_y = self._rotate_point(x, y)
 
         # Central rect
         central_rect_length = self.length - self.height
