@@ -18,9 +18,7 @@ class DiscretePlanePartition:
     Ny: int  # Step size along y-axis
 
 
-BoundaryCondition1D = Union[
-    Callable[[float], float], Callable[[np.ndarray], np.ndarray]
-]  # Accept 1 agrument, since second dimension is fixed
+BoundaryCondition1D = Callable[[float], float]  # Accept 1 agrument, since second dimension is fixed
 InternalCondition2D = Callable[[float, float], Tuple[float, bool]]
 
 
