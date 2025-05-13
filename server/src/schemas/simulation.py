@@ -31,7 +31,7 @@ class SimulationArrowShape(BaseModel):
     shape_type: Literal[ShapeType.ARROW] = ShapeType.ARROW
     height: float = Field(gt=0, lt=10, examples=[6])
     length: float = Field(gt=0, lt=10, examples=[8])
-    angle: float = Field(gt=0, lt=2 * math.pi, examples=[math.pi / 2])
+    angle: float = Field(ge=0, le=2 * math.pi, examples=[math.pi / 2])
 
 
 class SimulationConductor(BaseModel):
