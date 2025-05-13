@@ -1,7 +1,10 @@
 {
   // Client
   "prettier.configPath": "client/.prettierrc",
-
   // Server
-  "python.analysis.extraPaths": ["server/src"]
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/server/src"
+  ],
+  "mypy.configFile": "./server/pyproject.toml",
+  "python.envFile": "${workspaceFolder}/.env"
 }
