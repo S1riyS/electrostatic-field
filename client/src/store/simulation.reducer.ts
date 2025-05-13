@@ -26,8 +26,8 @@ const initialState: SimulationState = {
       shape: {
         shape_type: ShapeType.ARROW,
         angle: Math.PI / 4,
-        height: 5,
-        length: 10,
+        height: 4,
+        length: 8,
       },
     },
     electrodes: {

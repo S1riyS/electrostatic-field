@@ -1,6 +1,7 @@
 import { Col, Container, Row } from "react-bootstrap";
 import SimulateButton from "../components/SimulateButton";
 import SimulationParamsBlock from "../components/SimulationParamsBlock";
+import VisualizationBlock from "../components/VisualizationBlock";
 
 const MainPage = () => {
   return (
@@ -13,7 +14,7 @@ const MainPage = () => {
           <SimulateButton />
         </Col>
         <Col md={6} lg={8}>
-          todo
+          <VisualizationBlock />
         </Col>
       </Row>
     </Container>
