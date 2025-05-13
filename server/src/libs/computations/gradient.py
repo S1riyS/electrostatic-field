@@ -6,7 +6,8 @@ from numpy.typing import NDArray
 
 def gradient(f: NDArray[np.float64], dx: float, dy: float) -> NDArray[np.float64]:
     grad_x, grad_y = np.gradient(f, dx, dy)
-    return (grad_x, grad_y)
+    return np.dstack([grad_x, grad_y])
+
 
 def gradient_magnitude(f, dx, dy):
     grad_x, grad_y = np.gradient(f, dx, dy)
