@@ -1,4 +1,5 @@
 import math
+from typing import Tuple
 
 from libs.shapes.core.shape import Shape
 
@@ -10,7 +11,7 @@ class Arrow(Shape):
         self.length = length
         self.angle = angle
 
-    def _rotate_point(self, x: float, y: float) -> tuple:
+    def _rotate_point(self, x: float, y: float) -> Tuple[float, float]:
         """Rotates point A(x, y) relative to center of shape on angle self.angle"""
         # Relative coords
         translated_x = x - self.x

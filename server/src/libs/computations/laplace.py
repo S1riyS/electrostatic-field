@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Callable, Dict, List, Tuple, Union
 
 import numpy as np
+from numpy.typing import NDArray
 from scipy.sparse import lil_matrix  # type: ignore
 from scipy.sparse.linalg import spsolve  # type: ignore
 
@@ -63,13 +64,13 @@ class LaplaceSolver:
         }
         self.internal_conditions: List[InternalCondition2D] = []
 
-    def add_boundary_condition(self, orientation: BoundaryOrientation, cond: BoundaryConditionData):
+    def add_boundary_condition(self, orientation: BoundaryOrientation, cond: BoundaryConditionData) -> None:
         self.boundary_conditions[orientation].append(cond)
 
-    def add_internal_condition(self, cond: InternalCondition2D):
+    def add_internal_condition(self, cond: InternalCondition2D) -> None:
         self.internal_conditions.append(cond)
 
-    def _apply_boundary_conditions(self, u: np.ndarray) -> np.ndarray:
+    def _apply_boundary_conditions(self, u: NDArray[np.float64]) -> NDArray[np.float64]:
         """Apply all registered boundary conditions to the solution array."""
         Ny, Nx = u.shape
         y = np.linspace(0, self.partition.Ly, Ny)
@@ -101,7 +102,7 @@ class LaplaceSolver:
 
         return u
 
-    def _apply_internal_conditions(self, u: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _apply_internal_conditions(self, u: NDArray[np.float64]) -> Tuple[NDArray[np.float64], NDArray[np.bool_]]:
         """Apply all registered internal conditions and return the solution array and fixed mask."""
         Ny, Nx = u.shape
         fixed_mask = np.zeros((Ny, Nx), dtype=bool)
@@ -118,7 +119,7 @@ class LaplaceSolver:
 
         return u, fixed_mask
 
-    def solve(self) -> np.ndarray:
+    def solve(self) -> NDArray[np.float64]:
         """Solve Laplace's equation with the given boundary and internal conditions."""
         Nx = self.partition.Nx
         Ny = self.partition.Ny
@@ -126,7 +127,7 @@ class LaplaceSolver:
         dy = self.partition.dy
 
         # Initialize solution array
-        u = np.zeros((Ny, Nx))
+        u: NDArray[np.float64] = np.zeros((Ny, Nx))
 
         # Apply boundary conditions
         u = self._apply_boundary_conditions(u)
@@ -150,7 +151,7 @@ class LaplaceSolver:
 
         # Build sparse matrix and right-hand side
         A = lil_matrix((N, N))
-        rhs = np.zeros(N)
+        rhs: NDArray[np.float64] = np.zeros(N, dtype=np.float64)
 
         current_idx = 0
         for i in range(1, Ny - 1):

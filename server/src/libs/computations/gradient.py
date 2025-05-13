@@ -1,7 +1,8 @@
 import numpy as np
+from numpy.typing import NDArray
 
 
-def gradient_magnitude(f: np.ndarray, dx: float, dy: float) -> np.ndarray:
+def gradient_magnitude(f: NDArray[np.float64], dx: float, dy: float) -> NDArray[np.float64]:
     # Инициализация массивов для производных
     grad_x = np.zeros_like(f)
     grad_y = np.zeros_like(f)

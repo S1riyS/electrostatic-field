@@ -7,7 +7,7 @@ class Rect(Shape):
         self.a = a
         self.b = b
 
-    def check_point(self, x, y) -> bool:
+    def check_point(self, x: float, y: float) -> bool:
         relative_x = x - self.x
         relative_y = y - self.y
 

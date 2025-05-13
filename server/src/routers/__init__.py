@@ -7,5 +7,5 @@ api_router.include_router(simulation_router)
 
 
 @api_router.get("/health", status_code=200)
-def health():
+def health() -> dict[str, str]:
     return {"status": "ok"}
