@@ -1,5 +1,9 @@
 from typing import List, Tuple
+
 from fastapi import HTTPException
+import numpy as np
+from numpy.typing import NDArray
+
 from libs.computations.gradient import gradient
 from libs.computations.laplace import (
     BoundaryConditionData,
@@ -9,6 +13,7 @@ from libs.computations.laplace import (
     InternalCondition2D,
     LaplaceSolver,
 )
+from libs.computations.potential import get_electrodes_potential_field
 from libs.shapes.arrow import Arrow
 from libs.shapes.core.enums import ShapeType
 from libs.shapes.core.shape import Shape
@@ -38,9 +43,14 @@ class SimulationService:
         solver.add_internal_condition(internal_condition)
 
         u = solver.solve()
+        v = get_electrodes_potential_field(data.electrodes, plane_partition)
+
+        u += v
 
         potential: List[List[float]] = u.tolist()
-        electric_field: List[List[Tuple[float, float]]] = -gradient(u, plane_partition.dx, plane_partition.dy).tolist()
+        electric_field: List[List[Tuple[float, float]]] = (
+            -gradient(u, plane_partition.dx, plane_partition.dy)
+        ).tolist()
 
         return SimulationResponse(
             potential=potential,
@@ -101,9 +111,13 @@ class SimulationService:
                 BoundaryOrientation.LEFT,
                 BoundaryConditionData(BoundaryConditionType.DIRICHLET, zero_boundary),
             ),
+            # (
+            #     BoundaryOrientation.RIGHT,
+            #     BoundaryConditionData(BoundaryConditionType.DIRICHLET, positive_electrode_boundary),
+            # ),
             (
                 BoundaryOrientation.RIGHT,
-                BoundaryConditionData(BoundaryConditionType.DIRICHLET, positive_electrode_boundary),
+                BoundaryConditionData(BoundaryConditionType.DIRICHLET, zero_boundary),
             ),
         ]
 
