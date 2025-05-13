@@ -82,5 +82,5 @@ class SimulationRequest(BaseModel):
 
 
 class SimulationResponse(BaseModel):
-    potentianl: List[List[float]]
+    potential: List[List[float]]
     electric_field: List[List[Tuple[float, float]]]

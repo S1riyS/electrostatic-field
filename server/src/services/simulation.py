@@ -43,7 +43,7 @@ class SimulationService:
         electric_field: List[List[Tuple[float, float]]] = -gradient(u, plane_partition.dx, plane_partition.dy).tolist()
 
         return SimulationResponse(
-            potentianl=potential,
+            potential=potential,
             electric_field=electric_field,
         )
 
