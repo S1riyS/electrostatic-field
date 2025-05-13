@@ -3,7 +3,7 @@ from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
-from libs.computations.gradient import gradient_magnitude
+from libs.computations.gradient import gradient, gradient_magnitude
 from libs.computations.laplace import (
     BoundaryConditionData,
     BoundaryConditionType,
@@ -57,6 +57,18 @@ def apply_electrodes_potential(x: float, y: float, shape: Shape) -> float:
 
     return 0 + (x / 100) * 47.62
 
+def _plot_field(potential, width, height):
+    Ex, Ey = gradient(potential, width / NX, height / NY)
+    x_grid = np.linspace(0, width, NX)
+    y_grid = np.linspace(0, height, NY)
+
+    X, Y = np.meshgrid(x_grid, y_grid)
+    plt.figure(figsize=(25, 17.5))
+
+    plt.streamplot(X, Y, Ex, Ey, color='red', density=2.5, linewidth=1)
+    plt.contour(X, Y, potential, levels=20, colors='gray')
+    plt.savefig(f"tmp/electric_lines.png")
+
 
 def _plot_solution(self: LaplaceSolver, u: np.ndarray, title: str) -> None:
     """Create a heat map visualization of the solution."""
@@ -105,14 +117,14 @@ if __name__ == "__main__":
     rect = Rect(WIDTH / 2, HEIGHT / 2, a=20, b=2)
     shape_potential = 7.35
 
-    # shape_condition_ring = generate_internal_condition(ring, shape_potential)
-    # solver.add_internal_condition(shape_condition_ring)
+    shape_condition_ring = generate_internal_condition(ring, shape_potential)
+    solver.add_internal_condition(shape_condition_ring)
 
     # shape_condition_arrow = generate_internal_condition/(arrow, shape_potential)
     # solver.add_internal_condition(shape_condition_arrow)
 
-    shape_condition_rect = generate_internal_condition(rect, shape_potential)
-    solver.add_internal_condition(shape_condition_rect)
+    # shape_condition_rect = generate_internal_condition(rect, shape_potential)
+    # solver.add_internal_condition(shape_condition_rect)
 
     # Boudndary conditions
     solver.add_boundary_condition(
@@ -161,6 +173,8 @@ if __name__ == "__main__":
     # _plot_solution(solver, elctrode_potential, title="electrode_potential")
 
     # potential = potential + elctrode_potential
+
+    _plot_field(potential, WIDTH, HEIGHT)
 
     electric_field = gradient_magnitude(potential, WIDTH / NX, WIDTH / NY)
     print(f"Electric field: min={np.min(electric_field)}, max={np.max(electric_field)}")
