@@ -43,9 +43,6 @@ class SimulationService:
         solver.add_internal_condition(internal_condition)
 
         u = solver.solve()
-        v = get_electrodes_potential_field(data.electrodes, plane_partition, shape)
-
-        u += v
 
         potential: List[List[float]] = u.tolist()
         electric_field: List[List[Tuple[float, float]]] = (
@@ -111,14 +108,14 @@ class SimulationService:
                 BoundaryOrientation.LEFT,
                 BoundaryConditionData(BoundaryConditionType.DIRICHLET, zero_boundary),
             ),
-            # (
-            #     BoundaryOrientation.RIGHT,
-            #     BoundaryConditionData(BoundaryConditionType.DIRICHLET, positive_electrode_boundary),
-            # ),
             (
                 BoundaryOrientation.RIGHT,
-                BoundaryConditionData(BoundaryConditionType.DIRICHLET, zero_boundary),
+                BoundaryConditionData(BoundaryConditionType.DIRICHLET, positive_electrode_boundary),
             ),
+            # (
+            #     BoundaryOrientation.RIGHT,
+            #     BoundaryConditionData(BoundaryConditionType.DIRICHLET, zero_boundary),
+            # ),
         ]
 
     def __setup_internal_condition(self, shape: Shape, potential: float) -> InternalCondition2D:
