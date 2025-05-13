@@ -43,7 +43,7 @@ class SimulationService:
         solver.add_internal_condition(internal_condition)
 
         u = solver.solve()
-        v = get_electrodes_potential_field(data.electrodes, plane_partition)
+        v = get_electrodes_potential_field(data.electrodes, plane_partition, shape)
 
         u += v
 
@@ -123,8 +123,8 @@ class SimulationService:
 
     def __setup_internal_condition(self, shape: Shape, potential: float) -> InternalCondition2D:
         def cond(x: float, y: float) -> Tuple[float, bool]:
-            is_inside_shape = shape.check_point(x, y)
-            if shape.check_point(x, y):
+            is_inside_shape = shape.check_surface(x, y)
+            if shape.check_surface(x, y):
                 value = potential
             else:
                 value = 0

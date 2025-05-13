@@ -25,7 +25,7 @@ class Arrow(Shape):
 
         return rotated_x, rotated_y
 
-    def check_point(self, x: float, y: float) -> bool:
+    def check_surface(self, x: float, y: float) -> bool:
         relative_x, relative_y = self._rotate_point(x, y)
 
         # Central rect
@@ -52,3 +52,6 @@ class Arrow(Shape):
             return True
 
         return False
+
+    def check_inside(self, x: float, y: float) -> bool:
+        return self.check_surface(x, y)

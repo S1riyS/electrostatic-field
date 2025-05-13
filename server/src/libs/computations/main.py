@@ -20,7 +20,7 @@ from libs.shapes.ring import Ring
 
 def generate_internal_condition(shape: Shape, potential: float) -> InternalCondition2D:
     def cond(x: float, y: float) -> Tuple[float, bool]:
-        is_inside_shape = shape.check_point(x, y)
+        is_inside_shape = shape.check_surface(x, y)
         if is_inside_shape:
             value = potential
         else:
@@ -52,10 +52,11 @@ def zero_dirichlet(_: float) -> float:
 
 
 def apply_electrodes_potential(x: float, y: float, shape: Shape) -> float:
-    if shape.check_point(x, y):
+    if shape.check_surface(x, y):
         return 0
 
     return 0 + (x / 100) * 47.62
+
 
 def _plot_field(potential, width, height):
     Ex, Ey = gradient(potential, width / NX, height / NY)
@@ -65,8 +66,8 @@ def _plot_field(potential, width, height):
     X, Y = np.meshgrid(x_grid, y_grid)
     plt.figure(figsize=(25, 17.5))
 
-    plt.streamplot(X, Y, Ex, Ey, color='red', density=2.5, linewidth=1)
-    plt.contour(X, Y, potential, levels=20, colors='gray')
+    plt.streamplot(X, Y, Ex, Ey, color="red", density=2.5, linewidth=1)
+    plt.contour(X, Y, potential, levels=20, colors="gray")
     plt.savefig(f"tmp/electric_lines.png")
 
 

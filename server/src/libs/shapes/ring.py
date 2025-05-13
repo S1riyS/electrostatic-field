@@ -11,6 +11,10 @@ class Ring(Shape):
         if self.inner_radius >= self.outer_radius:
             raise ValueError("Inner radius must be less than outer radius")
 
-    def check_point(self, x: float, y: float) -> bool:
+    def check_surface(self, x: float, y: float) -> bool:
         distance = get_distance(x, y, self.x, self.y)
         return distance >= self.inner_radius and distance <= self.outer_radius
+
+    def check_inside(self, x: float, y: float) -> bool:
+        distance = get_distance(x, y, self.x, self.y)
+        return distance <= self.outer_radius

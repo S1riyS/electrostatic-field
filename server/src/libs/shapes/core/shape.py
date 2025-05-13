@@ -8,6 +8,11 @@ class Shape(ABC):
         self.y = y
 
     @abstractmethod
-    def check_point(self, x: float, y: float) -> bool:
-        "Checks if points A(x, y) lies witin shape"
+    def check_surface(self, x: float, y: float) -> bool:
+        "Checks if points A(x, y) lies on surface of shape"
+        ...
+
+    @abstractmethod
+    def check_inside(self, x: float, y: float) -> bool:
+        "Checks if points A(x, y) lies inside outer boundary of shape"
         ...
