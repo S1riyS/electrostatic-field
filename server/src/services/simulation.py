@@ -36,9 +36,9 @@ class SimulationService:
         internal_condition = self.__setup_internal_condition(shape, data.conductor.potential)
         solver.add_internal_condition(internal_condition)
 
-        answer = solver.solve()
-        # Return
-        return SimulationResponse(data=0)
+        u = solver.solve()
+        answer: List[List[float]] = u.tolist()
+        return SimulationResponse(data=answer)
 
     def __retrieve_shape(self, data: SimulationRequest) -> Shape | None:
         if data.conductor.shape_type == ShapeType.RING and isinstance(data.conductor.shape, SimulationRingShape):
@@ -64,8 +64,8 @@ class SimulationService:
         Ny = 500
         return DiscretePlanePartition(
             data.bath.x_boundary,
-            data.bath.x_boundary,
             Nx,
+            data.bath.y_boundary,
             Ny,
         )
 
