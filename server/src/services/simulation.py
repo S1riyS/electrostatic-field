@@ -1,5 +1,6 @@
 from typing import List, Tuple
 from fastapi import HTTPException
+from libs.computations.gradient import gradient
 from libs.computations.laplace import (
     BoundaryConditionData,
     BoundaryConditionType,
@@ -37,8 +38,14 @@ class SimulationService:
         solver.add_internal_condition(internal_condition)
 
         u = solver.solve()
-        answer: List[List[float]] = u.tolist()
-        return SimulationResponse(data=answer)
+
+        potential: List[List[float]] = u.tolist()
+        electric_field: List[List[Tuple[float, float]]] = -gradient(u, plane_partition.dx, plane_partition.dy).tolist()
+
+        return SimulationResponse(
+            potentianl=potential,
+            electric_field=electric_field,
+        )
 
     def __retrieve_shape(self, data: SimulationRequest) -> Shape | None:
         if isinstance(data.conductor.shape, SimulationRingShape):

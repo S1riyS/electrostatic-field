@@ -1,5 +1,5 @@
 import math
-from typing import List, Literal, Union
+from typing import List, Literal, Tuple, Union
 from typing_extensions import Self
 
 from numpy import inner
@@ -82,4 +82,5 @@ class SimulationRequest(BaseModel):
 
 
 class SimulationResponse(BaseModel):
-    data: List[List[float]]
+    potentianl: List[List[float]]
+    electric_field: List[List[Tuple[float, float]]]
