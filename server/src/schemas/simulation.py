@@ -1,6 +1,9 @@
-from typing import Union
+import math
+from typing import List, Union
 
 from pydantic import BaseModel, Field
+
+from libs.shapes.core.enums import ShapeType
 
 
 class SimulationBath(BaseModel):
@@ -26,12 +29,13 @@ class SimulationRingShape(BaseModel):
 class SimulationArrowShape(BaseModel):
     height: float = Field(gt=0, lt=10, examples=[6])
     length: float = Field(gt=0, lt=10, examples=[8])
+    angle: float = Field(gt=0, lt=2 * math.pi, examples=[math.pi / 2])
 
 
 class SimulationConductor(BaseModel):
     x: float = Field(gt=1, lt=50, examples=[20], description="Position along x-axis. Units: [cm]")
     y: float = Field(gt=1, lt=50, examples=[10], description="Position along y-axis. Units: [cm]")
-    shape_type: str  # You might want to replace this with a Literal or Enum for specific shape types
+    shape_type: ShapeType
     shape: Union[SimulationRingShape, SimulationArrowShape]
     potential: float = Field(gt=0, examples=[7.35])
 
@@ -51,4 +55,4 @@ class SimulationRequest(BaseModel):
 
 
 class SimulationResponse(BaseModel):
-    data: int
+    data: List[List[float]]

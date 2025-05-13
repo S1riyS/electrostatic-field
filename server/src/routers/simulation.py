@@ -5,7 +5,7 @@ from services.simulation import SimulationService
 simulation_router = APIRouter(prefix="/simulation", tags=["Simulation"])
 
 
-@simulation_router.post("/", response_model=SimulationResponse)
-async def simulate(data: SimulationRequest):
+@simulation_router.post("/")
+async def simulate(data: SimulationRequest) -> SimulationResponse:
     service = SimulationService()
-    return await service.approximate(data)
+    return await service.run(data)

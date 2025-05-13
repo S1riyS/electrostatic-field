@@ -14,6 +14,7 @@ from libs.computations.laplace import (
 )
 from libs.shapes.arrow import Arrow
 from libs.shapes.core.shape import Shape
+from libs.shapes.rect import Rect
 from libs.shapes.ring import Ring
 
 
@@ -57,11 +58,11 @@ def apply_electrodes_potential(x: float, y: float, shape: Shape) -> float:
     return 0 + (x / 100) * 47.62
 
 
-def _plot_solution(self: LaplaceSolver, u: np.ndarray, title: str):
+def _plot_solution(self: LaplaceSolver, u: np.ndarray, title: str) -> None:
     """Create a heat map visualization of the solution."""
     plt.figure(figsize=(10, 8))
 
-    # Create grid coordinates
+    # Create grid coordinatesc
     x = np.linspace(0, self.partition.Lx, self.partition.Nx)
     y = np.linspace(0, self.partition.Ly, self.partition.Ny)
     X, Y = np.meshgrid(x, y)
@@ -100,14 +101,18 @@ if __name__ == "__main__":
 
     # Internal conditions
     arrow = Arrow(WIDTH / 2, HEIGHT / 2, height=6, length=8, angle=math.pi / 4)
-    ring = Ring(WIDTH / 2, HEIGHT / 2, inner_radius=3, outer_radius=6)
+    ring = Ring(WIDTH / 2, HEIGHT / 2, inner_radius=0, outer_radius=6)
+    rect = Rect(WIDTH / 2, HEIGHT / 2, a=20, b=2)
     shape_potential = 7.35
 
-    shape_condition_ring = generate_internal_condition(ring, shape_potential)
-    solver.add_internal_condition(shape_condition_ring)
+    # shape_condition_ring = generate_internal_condition(ring, shape_potential)
+    # solver.add_internal_condition(shape_condition_ring)
 
-    # shape_condition_arrow = generate_internal_condition(arrow, shape_potential)
+    # shape_condition_arrow = generate_internal_condition/(arrow, shape_potential)
     # solver.add_internal_condition(shape_condition_arrow)
+
+    shape_condition_rect = generate_internal_condition(rect, shape_potential)
+    solver.add_internal_condition(shape_condition_rect)
 
     # Boudndary conditions
     solver.add_boundary_condition(
@@ -148,23 +153,23 @@ if __name__ == "__main__":
     print(f"Potential: min={np.min(potential)}, max={np.max(potential)}")
     _plot_solution(solver, potential, title="potential")
 
-    x = np.linspace(0, partition.Lx, partition.Nx)
-    y = np.linspace(0, partition.Ly, partition.Ny)
-    X, Y = np.meshgrid(x, y)
-    elctrode_potential_fn = np.vectorize(apply_electrodes_potential)
-    elctrode_potential = elctrode_potential_fn(X, Y, shape=ring)
-    _plot_solution(solver, elctrode_potential, title="electrode_potential")
+    # x = np.linspace(0, partition.Lx, partition.Nx)
+    # y = np.linspace(0, partition.Ly, partition.Ny)
+    # X, Y = np.meshgrid(x, y)
+    # elctrode_potential_fn = np.vectorize(apply_electrodes_potential)
+    # elctrode_potential = elctrode_potential_fn(X, Y, shape=rect)
+    # _plot_solution(solver, elctrode_potential, title="electrode_potential")
 
-    potential = potential + elctrode_potential
+    # potential = potential + elctrode_potential
 
     electric_field = gradient_magnitude(potential, WIDTH / NX, WIDTH / NY)
     print(f"Electric field: min={np.min(electric_field)}, max={np.max(electric_field)}")
     _plot_solution(solver, np.log1p(electric_field), title="electric_field")
 
-    # Альтернатива: цветные заливки между линиями уровня
-    contour = plt.contour(X, Y, np.log1p(electric_field), levels=20, cmap="viridis")
-    plt.clabel(contour, inline=True, fontsize=8)  # подписи уровней
-    plt.xlabel("X")
-    plt.ylabel("Y")
-    plt.grid(True)
-    plt.show()
+    # # Альтернатива: цветные заливки между линиями уровня
+    # contour = plt.contour(X, Y, np.log1p(electric_field), levels=20, cmap="viridis")
+    # plt.clabel(contour, inline=True, fontsize=8)  # подписи уровней
+    # plt.xlabel("X")
+    # plt.ylabel("Y")
+    # plt.grid(True)
+    # plt.show()

@@ -17,6 +17,14 @@ class DiscretePlanePartition:
     Ly: float  # Starting value of y
     Ny: int  # Step size along y-axis
 
+    @property
+    def dx(self) -> float:
+        return self.Lx / (self.Nx - 1)
+
+    @property
+    def dy(self) -> float:
+        return self.Ly / (self.Ny - 1)
+
 
 BoundaryCondition1D = Callable[[float], float]  # Accept 1 agrument, since second dimension is fixed
 InternalCondition2D = Callable[[float, float], Tuple[float, bool]]
@@ -112,10 +120,10 @@ class LaplaceSolver:
 
     def solve(self) -> np.ndarray:
         """Solve Laplace's equation with the given boundary and internal conditions."""
-        Ny = self.partition.Ny
         Nx = self.partition.Nx
-        dx = self.partition.Lx / (Nx - 1)
-        dy = self.partition.Ly / (Ny - 1)
+        Ny = self.partition.Ny
+        dx = self.partition.dx
+        dy = self.partition.dy
 
         # Initialize solution array
         u = np.zeros((Ny, Nx))
