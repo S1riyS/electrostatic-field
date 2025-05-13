@@ -41,14 +41,14 @@ class SimulationService:
         return SimulationResponse(data=answer)
 
     def __retrieve_shape(self, data: SimulationRequest) -> Shape | None:
-        if data.conductor.shape_type == ShapeType.RING and isinstance(data.conductor.shape, SimulationRingShape):
+        if isinstance(data.conductor.shape, SimulationRingShape):
             return Ring(
                 data.conductor.x,
                 data.conductor.y,
                 data.conductor.shape.inner_radius,
                 data.conductor.shape.outer_radius,
             )
-        elif data.conductor.shape_type == ShapeType.ARROW and isinstance(data.conductor.shape, SimulationArrowShape):
+        elif isinstance(data.conductor.shape, SimulationArrowShape):
             return Arrow(
                 data.conductor.x,
                 data.conductor.y,
