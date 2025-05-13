@@ -17,60 +17,6 @@ from libs.shapes.core.shape import Shape
 from libs.shapes.ring import Ring
 
 
-def ring_condition(x: float, y: float) -> Tuple[float, bool]:
-    # Center of ring is at (x, y) = (15, 10)
-    center_x = 15
-    center_y = 10
-
-    inner_radius = 3
-    outer_radius = 6
-    potential = 7.35
-
-    distance = math.sqrt((center_x - x) ** 2 + (center_y - y) ** 2)
-    if distance >= inner_radius and distance <= outer_radius:
-        return potential, True
-    return 0, False
-
-
-def arrow_condition(x: float, y: float) -> Tuple[float, bool]:
-    # Center of arrow is at (x, y) = (15, 10)
-    center_x = 15
-    center_y = 10
-
-    h = 6
-    l = 8
-    assert l > h
-    potential = 7.35
-
-    relative_x = x - center_x
-    relative_y = y - center_y
-
-    # Central rect
-    central_rect_length = l - h
-    in_central_rect_x = -(central_rect_length / 2) <= relative_x <= (central_rect_length / 2)
-    in_central_rect_y = -(h / 2) <= relative_y <= (h / 2)
-    in_central_rect = in_central_rect_x and in_central_rect_y
-
-    # Left triangle
-    in_left_x = -(l / 2) <= relative_x <= -(central_rect_length / 2)
-    in_left_upper = relative_y <= (l / 2) + relative_x
-    in_left_lower = relative_y >= -(l / 2) - relative_x
-    in_left = in_left_x and in_left_upper and in_left_lower
-
-    # Right triangle
-    in_right_x = (central_rect_length / 2) <= relative_x <= (l / 2)
-    in_right_y = -(h / 2) <= relative_y <= (h / 2)
-    in_right_upper = relative_y >= -(central_rect_length) / 2 + relative_x
-    in_right_lower = relative_y <= (central_rect_length) / 2 - relative_x
-    in_right = in_right_x and in_right_y and (in_right_upper or in_right_lower)
-
-    in_arrow = in_central_rect or in_left or in_right
-    if in_arrow:
-        return potential, True
-
-    return 0, False
-
-
 def generate_internal_condition(shape: Shape, potential: float) -> InternalCondition2D:
     def cond(x: float, y: float) -> Tuple[float, bool]:
         is_inside_shape = shape.check_point(x, y)
@@ -100,12 +46,15 @@ def right_electrode_condition(y: float) -> float:
     return 0
 
 
-def zero_neumann(x: float, y: float) -> float:
-    return 0.0  # The derivative value we want (∂f/∂n = 0)
-
-
 def zero_dirichlet(_: float) -> float:
     return 0
+
+
+def apply_electrodes_potential(x: float, y: float, shape: Shape) -> float:
+    if shape.check_point(x, y):
+        return 0
+
+    return 0 + (x / 100) * 47.62
 
 
 def _plot_solution(self: LaplaceSolver, u: np.ndarray, title: str):
@@ -141,8 +90,8 @@ if __name__ == "__main__":
     WIDTH = 30  # cm
     HEIGHT = 20  # cm
 
-    NX = 750
-    NY = 750
+    NX = 500
+    NY = 500
 
     partition = DiscretePlanePartition(WIDTH, NX, HEIGHT, NY)
 
@@ -154,11 +103,11 @@ if __name__ == "__main__":
     ring = Ring(WIDTH / 2, HEIGHT / 2, inner_radius=3, outer_radius=6)
     shape_potential = 7.35
 
-    # shape_condition_ring = generate_internal_condition(ring, shape_potential)
-    # solver.add_internal_condition(shape_condition_ring)
+    shape_condition_ring = generate_internal_condition(ring, shape_potential)
+    solver.add_internal_condition(shape_condition_ring)
 
-    shape_condition_arrow = generate_internal_condition(arrow, shape_potential)
-    solver.add_internal_condition(shape_condition_arrow)
+    # shape_condition_arrow = generate_internal_condition(arrow, shape_potential)
+    # solver.add_internal_condition(shape_condition_arrow)
 
     # Boudndary conditions
     solver.add_boundary_condition(
@@ -199,6 +148,23 @@ if __name__ == "__main__":
     print(f"Potential: min={np.min(potential)}, max={np.max(potential)}")
     _plot_solution(solver, potential, title="potential")
 
+    x = np.linspace(0, partition.Lx, partition.Nx)
+    y = np.linspace(0, partition.Ly, partition.Ny)
+    X, Y = np.meshgrid(x, y)
+    elctrode_potential_fn = np.vectorize(apply_electrodes_potential)
+    elctrode_potential = elctrode_potential_fn(X, Y, shape=ring)
+    _plot_solution(solver, elctrode_potential, title="electrode_potential")
+
+    potential = potential + elctrode_potential
+
     electric_field = gradient_magnitude(potential, WIDTH / NX, WIDTH / NY)
     print(f"Electric field: min={np.min(electric_field)}, max={np.max(electric_field)}")
     _plot_solution(solver, np.log1p(electric_field), title="electric_field")
+
+    # Альтернатива: цветные заливки между линиями уровня
+    contour = plt.contour(X, Y, np.log1p(electric_field), levels=20, cmap="viridis")
+    plt.clabel(contour, inline=True, fontsize=8)  # подписи уровней
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.grid(True)
+    plt.show()
