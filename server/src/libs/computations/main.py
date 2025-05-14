@@ -3,7 +3,7 @@ from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
-from libs.computations.gradient import gradient, gradient_magnitude
+from libs.computations.gradient import gradient, gradient_magnitude, gradient_vectors
 from libs.computations.laplace import (
     BoundaryConditionData,
     BoundaryConditionType,
@@ -59,7 +59,7 @@ def apply_electrodes_potential(x: float, y: float, shape: Shape) -> float:
 
 
 def _plot_field(potential, width, height):
-    Ex, Ey = gradient(potential, width / NX, height / NY)
+    Ex, Ey = gradient_vectors(potential, width / NX, height / NY)
     x_grid = np.linspace(0, width, NX)
     y_grid = np.linspace(0, height, NY)
 
