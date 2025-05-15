@@ -2,7 +2,7 @@ import os
 from typing import Callable, List, Tuple
 
 import numpy as np
-from libs.computations.gradient import gradient, gradient_magnitude
+from libs.computations.gradient import gradient, gradient_magnitude, gradient_vectors
 from libs.computations.laplace import (
     BoundaryCondition1D,
     BoundaryConditionData,
@@ -151,6 +151,19 @@ def __apply_electrodes_potential(x: float, y: float, shape: Shape, electric_fiel
 
     return 0 + (x / 100) * electric_field_value
 
+def __save_electric_lines_plot(potential, width: float, height: float, filename: str):
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+    Ex, Ey = gradient_vectors(potential, width / NX, height / NY)
+    x_grid = np.linspace(0, width, NX)
+    y_grid = np.linspace(0, height, NY)
+
+    X, Y = np.meshgrid(x_grid, y_grid)
+    plt.figure(figsize=(25, 17.5))
+
+    plt.streamplot(X, Y, Ex, Ey, color="red", density=2.5, linewidth=1)
+    plt.contour(X, Y, potential, levels=20, colors="gray")
+    plt.savefig(filename, bbox_inches="tight", dpi=300)
 
 def __save_heatmap(data: NDArray[np.float64], partition: DiscretePlanePartition, filename: str):
     """
@@ -240,7 +253,15 @@ def main() -> None:
         )
 
         # Calculate electric field
-        electric_field = np.log1p(gradient_magnitude(u, partition.dx, partition.dy))
+        electric_field = gradient_magnitude(u, partition.dx, partition.dy)
+
+        __save_electric_lines_plot(
+            potential=u,
+            width=30,
+            height=20,
+            filename=f"{IMAGES_DIR}/{approach_name}/potential_lines.png"
+        )
+
         __save_heatmap(
             electric_field,
             partition=partition,
