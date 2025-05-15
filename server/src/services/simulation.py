@@ -1,9 +1,7 @@
 from typing import List, Tuple
 
-from fastapi import HTTPException
 import numpy as np
-from numpy.typing import NDArray
-
+from fastapi import HTTPException
 from libs.computations.gradient import gradient
 from libs.computations.laplace import (
     BoundaryConditionData,
@@ -18,13 +16,19 @@ from libs.shapes.arrow import Arrow
 from libs.shapes.core.enums import ShapeType
 from libs.shapes.core.shape import Shape
 from libs.shapes.ring import Ring
-from schemas.simulation import SimulationArrowShape, SimulationRequest, SimulationResponse, SimulationRingShape
+from numpy.typing import NDArray
+from schemas.simulation import (
+    SimulationArrowShape,
+    SimulationRequest,
+    SimulationResponse,
+    SimulationRingShape,
+)
 
 
 class SimulationService:
     async def run(self, data: SimulationRequest) -> SimulationResponse:
         # Retrieve shape
-        shape = self.__retrieve_shape(data)
+        shape = self._retrieve_shape(data)
         if shape is None:
             raise HTTPException(
                 status_code=400,
@@ -32,14 +36,14 @@ class SimulationService:
             )
 
         # Setup Laplce equation solver
-        plane_partition = self.__setup_plane_partition(data)
+        plane_partition = self._setup_plane_partition(data)
         solver = LaplaceSolver(plane_partition)
 
         # Setup conditions
-        for orientation, cond in self.__setup_boundary_conditions(data):
+        for orientation, cond in self._setup_boundary_conditions(data):
             solver.add_boundary_condition(orientation, cond)
 
-        internal_condition = self.__setup_internal_condition(shape, data.conductor.potential)
+        internal_condition = self._setup_internal_condition(shape, data.conductor.potential)
         solver.add_internal_condition(internal_condition)
 
         u = solver.solve()
@@ -54,7 +58,7 @@ class SimulationService:
             electric_field=electric_field,
         )
 
-    def __retrieve_shape(self, data: SimulationRequest) -> Shape | None:
+    def _retrieve_shape(self, data: SimulationRequest) -> Shape | None:
         if isinstance(data.conductor.shape, SimulationRingShape):
             return Ring(
                 data.conductor.x,
@@ -73,7 +77,7 @@ class SimulationService:
 
         return None
 
-    def __setup_plane_partition(self, data: SimulationRequest) -> DiscretePlanePartition:
+    def _setup_plane_partition(self, data: SimulationRequest) -> DiscretePlanePartition:
         Nx = 500
         Ny = 500
         return DiscretePlanePartition(
@@ -83,7 +87,7 @@ class SimulationService:
             Ny,
         )
 
-    def __setup_boundary_conditions(
+    def _setup_boundary_conditions(
         self,
         data: SimulationRequest,
     ) -> List[Tuple[BoundaryOrientation, BoundaryConditionData]]:
@@ -118,7 +122,7 @@ class SimulationService:
             # ),
         ]
 
-    def __setup_internal_condition(self, shape: Shape, potential: float) -> InternalCondition2D:
+    def _setup_internal_condition(self, shape: Shape, potential: float) -> InternalCondition2D:
         def cond(x: float, y: float) -> Tuple[float, bool]:
             is_inside_shape = shape.check_surface(x, y)
             if shape.check_surface(x, y):
