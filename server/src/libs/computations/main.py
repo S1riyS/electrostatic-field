@@ -3,7 +3,7 @@ from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
-from libs.computations.gradient import gradient, gradient_magnitude, gradient_vectors
+from libs.computations.gradient import gradient_magnitude, gradient_vectors
 from libs.computations.laplace import (
     BoundaryConditionData,
     BoundaryConditionType,
@@ -66,9 +66,9 @@ def _plot_field(potential, width, height):
     X, Y = np.meshgrid(x_grid, y_grid)
     plt.figure(figsize=(25, 17.5))
 
-    plt.streamplot(X, Y, Ex, Ey, color="red", density=2.5, linewidth=1)
+    plt.streamplot(X, Y, Ex, Ey, color="red", density=2, linewidth=1)
     plt.contour(X, Y, potential, levels=20, colors="gray")
-    plt.savefig(f"tmp/electric_lines.png")
+    plt.savefig("tmp/electric_lines.png")
 
 
 def _plot_solution(self: LaplaceSolver, u: np.ndarray, title: str) -> None:
@@ -187,4 +187,40 @@ if __name__ == "__main__":
     # plt.xlabel("X")
     # plt.ylabel("Y")
     # plt.grid(True)
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
+    # plt.show()
     # plt.show()

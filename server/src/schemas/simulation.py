@@ -1,11 +1,9 @@
 import math
 from typing import List, Literal, Tuple, Union
-from typing_extensions import Self
-
-from numpy import inner
-from pydantic import BaseModel, Field, model_validator
 
 from libs.shapes.core.enums import ShapeType
+from pydantic import BaseModel, Field, model_validator
+from typing_extensions import Self
 
 
 class SimulationBath(BaseModel):
@@ -25,7 +23,7 @@ class SimulationBath(BaseModel):
 
 class SimulationRingShape(BaseModel):
     shape_type: Literal[ShapeType.RING] = ShapeType.RING
-    inner_radius: float = Field(gt=0, le=10, examples=[5])
+    inner_radius: float = Field(ge=0, le=10, examples=[5])
     outer_radius: float = Field(gt=0, le=20, examples=[10])
 
     @model_validator(mode="after")
@@ -49,16 +47,26 @@ class SimulationArrowShape(BaseModel):
 
 
 class SimulationConductor(BaseModel):
-    x: float = Field(gt=1, lt=50, examples=[20], description="Position along x-axis. Units: [cm]")
-    y: float = Field(gt=1, lt=50, examples=[10], description="Position along y-axis. Units: [cm]")
-    shape: Union[SimulationRingShape, SimulationArrowShape] = Field(discriminator="shape_type")
+    x: float = Field(
+        gt=1, lt=50, examples=[20], description="Position along x-axis. Units: [cm]"
+    )
+    y: float = Field(
+        gt=1, lt=50, examples=[10], description="Position along y-axis. Units: [cm]"
+    )
+    shape: Union[SimulationRingShape, SimulationArrowShape] = Field(
+        discriminator="shape_type"
+    )
     potential: float = Field(gt=0, examples=[7.35])
 
 
 class SimulationElectrode(BaseModel):
-    y_lower: float = Field(gt=0, examples=[2], description="Lower Y bound. Units: [cm]")
-    y_upper: float = Field(gt=0, examples=[16], description="Upper Y bound. Units: [cm]")
-    potential: float = Field(gt=0, description="Constant electrode potential. Units: [V]")
+    y_lower: float = Field(ge=0, examples=[2], description="Lower Y bound. Units: [cm]")
+    y_upper: float = Field(
+        ge=0, examples=[16], description="Upper Y bound. Units: [cm]"
+    )
+    potential: float = Field(
+        gt=0, description="Constant electrode potential. Units: [V]"
+    )
 
     @model_validator(mode="after")
     def bounds_validation(self) -> Self:
@@ -77,7 +85,9 @@ class SimulationRequest(BaseModel):
     @model_validator(mode="after")
     def electrodes_validation(self) -> Self:
         if self.electrodes.y_upper > self.bath.y_boundary:
-            raise ValueError("Electrode upper bound cannot be greater than bath upper bound")
+            raise ValueError(
+                "Electrode upper bound cannot be greater than bath upper bound"
+            )
         return self
 
 

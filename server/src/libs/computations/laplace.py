@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
@@ -12,7 +12,7 @@ from scipy.sparse.linalg import spsolve  # type: ignore
 class DiscretePlanePartition:
     """Represents a discrete partition of a 2D plane."""
 
-    Lx: float  # Starting value of x
+    Lx: float  # TODO: Starting value of x
     Nx: int  # Step size along x-axis
 
     Ly: float  # Starting value of y
@@ -27,7 +27,9 @@ class DiscretePlanePartition:
         return self.Ly / (self.Ny - 1)
 
 
-BoundaryCondition1D = Callable[[float], float]  # Accept 1 agrument, since second dimension is fixed
+BoundaryCondition1D = Callable[
+    [float], float
+]  # Accept 1 agrument, since second dimension is fixed
 InternalCondition2D = Callable[[float, float], Tuple[float, bool]]
 
 
@@ -56,7 +58,9 @@ class LaplaceSolver:
 
     def __init__(self, partition: DiscretePlanePartition):
         self.partition = partition
-        self.boundary_conditions: Dict[BoundaryOrientation, List[BoundaryConditionData]] = {
+        self.boundary_conditions: Dict[
+            BoundaryOrientation, List[BoundaryConditionData]
+        ] = {
             BoundaryOrientation.LEFT: [],
             BoundaryOrientation.RIGHT: [],
             BoundaryOrientation.TOP: [],
@@ -64,7 +68,9 @@ class LaplaceSolver:
         }
         self.internal_conditions: List[InternalCondition2D] = []
 
-    def add_boundary_condition(self, orientation: BoundaryOrientation, cond: BoundaryConditionData) -> None:
+    def add_boundary_condition(
+        self, orientation: BoundaryOrientation, cond: BoundaryConditionData
+    ) -> None:
         self.boundary_conditions[orientation].append(cond)
 
     def add_internal_condition(self, cond: InternalCondition2D) -> None:
@@ -102,7 +108,9 @@ class LaplaceSolver:
 
         return u
 
-    def _apply_internal_conditions(self, u: NDArray[np.float64]) -> Tuple[NDArray[np.float64], NDArray[np.bool_]]:
+    def _apply_internal_conditions(
+        self, u: NDArray[np.float64]
+    ) -> Tuple[NDArray[np.float64], NDArray[np.bool_]]:
         """Apply all registered internal conditions and return the solution array and fixed mask."""
         Ny, Nx = u.shape
         fixed_mask = np.zeros((Ny, Nx), dtype=bool)

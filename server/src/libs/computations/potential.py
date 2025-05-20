@@ -1,8 +1,7 @@
 import numpy as np
-from numpy.typing import NDArray
-
 from libs.computations.laplace import DiscretePlanePartition
 from libs.shapes.core.shape import Shape
+from numpy.typing import NDArray
 from schemas.simulation import SimulationElectrode
 
 
@@ -22,5 +21,7 @@ def get_electrodes_potential_field(
             shape_mask = np.vectorize(shape.check_inside)(X, Y)
             y_mask = y_mask & (~shape_mask)
 
-    electrodes_potential = np.where(y_mask, electrodes_data.potential * (X / partition.Lx), 0)
+    electrodes_potential = np.where(
+        y_mask, electrodes_data.potential * (X / partition.Lx), 0
+    )
     return electrodes_potential

@@ -2,7 +2,10 @@ import os
 from typing import Callable, List, Tuple
 
 import numpy as np
-from libs.computations.gradient import gradient, gradient_magnitude, gradient_vectors
+from matplotlib import pyplot as plt
+from numpy.typing import NDArray
+
+from libs.computations.gradient import gradient_magnitude, gradient_vectors
 from libs.computations.laplace import (
     BoundaryCondition1D,
     BoundaryConditionData,
@@ -12,18 +15,18 @@ from libs.computations.laplace import (
     LaplaceSolver,
 )
 from libs.shapes.core.shape import Shape
-from matplotlib import pyplot as plt
-from numpy.typing import NDArray
 from schemas.simulation import (
+    SimulationArrowShape,
     SimulationBath,
     SimulationConductor,
     SimulationElectrode,
     SimulationRequest,
-    SimulationRingShape,
 )
 from services.simulation import SimulationService
 
-ConditionsGeneratorFunction = Callable[[SimulationRequest], List[Tuple[BoundaryOrientation, BoundaryConditionData]]]
+ConditionsGeneratorFunction = Callable[
+    [SimulationRequest], List[Tuple[BoundaryOrientation, BoundaryConditionData]]
+]
 
 NX = 500
 NY = 500
@@ -41,11 +44,16 @@ def __get_request() -> SimulationRequest:
             x=15,
             y=10,
             potential=7.35,
-            shape=SimulationRingShape(inner_radius=3, outer_radius=6),
+            # shape=SimulationRingShape(inner_radius=3, outer_radius=6),
+            shape=SimulationArrowShape(
+                height=4,
+                length=6,
+                angle=0,
+            ),
         ),
         electrodes=SimulationElectrode(
-            y_lower=3,
-            y_upper=17,
+            y_lower=0,
+            y_upper=20,
             potential=14,
         ),
     )
@@ -55,7 +63,9 @@ def __zero_boundary(_: float) -> float:
     return 0
 
 
-def __generate_electrode_condition(y_lower: float, y_upper: float, potential: float) -> BoundaryCondition1D:
+def __generate_electrode_condition(
+    y_lower: float, y_upper: float, potential: float
+) -> BoundaryCondition1D:
     def cond(x: float) -> float:
         is_inside_shape = x >= y_lower and x <= y_upper
         if is_inside_shape:
@@ -65,7 +75,20 @@ def __generate_electrode_condition(y_lower: float, y_upper: float, potential: fl
     return cond
 
 
-def __one_electrode_conditions(request: SimulationRequest) -> List[Tuple[BoundaryOrientation, BoundaryConditionData]]:
+def __uniform_condition(
+    x_max: float,
+    potential_low: float,
+    potential_high: float,
+) -> BoundaryCondition1D:
+    def cond(x: float) -> float:
+        return potential_low + (x / x_max) * (potential_high - potential_low)
+
+    return cond
+
+
+def __one_electrode_conditions(
+    request: SimulationRequest,
+) -> List[Tuple[BoundaryOrientation, BoundaryConditionData]]:
     """
     Boundary conditions for simulation when potential of positive electrode has potential specified in request
     and zero in negative electrode
@@ -97,19 +120,36 @@ def __one_electrode_conditions(request: SimulationRequest) -> List[Tuple[Boundar
     ]
 
 
-def __two_electrodes_conditions(request: SimulationRequest) -> List[Tuple[BoundaryOrientation, BoundaryConditionData]]:
+def __two_electrodes_conditions(
+    request: SimulationRequest,
+) -> List[Tuple[BoundaryOrientation, BoundaryConditionData]]:
     """
     Boundary conditions for simulation when potential of positive electrode has potential specified in request divied by 2
     and negative electrode has the same potential, but with opposite sign
     """
+    # TODO: change DTO so that it takes left and right potentials separately
     return [
         (
             BoundaryOrientation.TOP,
-            BoundaryConditionData(BoundaryConditionType.DIRICHLET, __zero_boundary),
+            BoundaryConditionData(
+                BoundaryConditionType.DIRICHLET,
+                __uniform_condition(
+                    request.bath.x_boundary,
+                    1 * request.electrodes.potential / 4,
+                    3 * request.electrodes.potential / 4,
+                ),
+            ),
         ),
         (
             BoundaryOrientation.BOTTOM,
-            BoundaryConditionData(BoundaryConditionType.DIRICHLET, __zero_boundary),
+            BoundaryConditionData(
+                BoundaryConditionType.DIRICHLET,
+                __uniform_condition(
+                    request.bath.x_boundary,
+                    1 * request.electrodes.potential / 4,
+                    3 * request.electrodes.potential / 4,
+                ),
+            ),
         ),
         (
             BoundaryOrientation.LEFT,
@@ -118,7 +158,7 @@ def __two_electrodes_conditions(request: SimulationRequest) -> List[Tuple[Bounda
                 __generate_electrode_condition(
                     request.electrodes.y_lower,
                     request.electrodes.y_upper,
-                    -request.electrodes.potential / 2,
+                    1 * request.electrodes.potential / 4,
                 ),
             ),
         ),
@@ -129,7 +169,7 @@ def __two_electrodes_conditions(request: SimulationRequest) -> List[Tuple[Bounda
                 __generate_electrode_condition(
                     request.electrodes.y_lower,
                     request.electrodes.y_upper,
-                    request.electrodes.potential / 2,
+                    3 * request.electrodes.potential / 4,
                 ),
             ),
         ),
@@ -145,13 +185,18 @@ def __separate_potentials_conditions(
     return []
 
 
-def __apply_electrodes_potential(x: float, y: float, shape: Shape, electric_field_value: float) -> float:
+def __apply_electrodes_potential(
+    x: float, y: float, shape: Shape, electric_field_value: float
+) -> float:
     if shape.check_inside(x, y):
         return 0
 
     return 0 + (x / 100) * electric_field_value
 
-def __save_electric_lines_plot(potential, width: float, height: float, filename: str):
+
+def __save_electric_lines_plot(
+    potential: NDArray[np.float64], width: float, height: float, filename: str
+) -> None:
     os.makedirs(os.path.dirname(filename), exist_ok=True)
 
     Ex, Ey = gradient_vectors(potential, width / NX, height / NY)
@@ -161,11 +206,14 @@ def __save_electric_lines_plot(potential, width: float, height: float, filename:
     X, Y = np.meshgrid(x_grid, y_grid)
     plt.figure(figsize=(25, 17.5))
 
-    plt.streamplot(X, Y, Ex, Ey, color="red", density=2.5, linewidth=1)
+    plt.streamplot(X, Y, Ex, Ey, color="red", density=2, linewidth=1)
     plt.contour(X, Y, potential, levels=20, colors="gray")
     plt.savefig(filename, bbox_inches="tight", dpi=300)
 
-def __save_heatmap(data: NDArray[np.float64], partition: DiscretePlanePartition, filename: str):
+
+def __save_heatmap(
+    data: NDArray[np.float64], partition: DiscretePlanePartition, filename: str
+) -> None:
     """
     Save a 2D numpy array as a heatmap image.
 
@@ -222,7 +270,9 @@ def main() -> None:
         solver = LaplaceSolver(partition)
 
         # Setup internal condition
-        internal_condition = service._setup_internal_condition(shape, request.conductor.potential)
+        internal_condition = service._setup_internal_condition(
+            shape, request.conductor.potential
+        )
         solver.add_internal_condition(internal_condition)
 
         conditions = conditions_gen_fn(request)
@@ -259,7 +309,7 @@ def main() -> None:
             potential=u,
             width=30,
             height=20,
-            filename=f"{IMAGES_DIR}/{approach_name}/potential_lines.png"
+            filename=f"{IMAGES_DIR}/{approach_name}/potential_lines.png",
         )
 
         __save_heatmap(

@@ -1,6 +1,5 @@
 from typing import List, Tuple
 
-import numpy as np
 from fastapi import HTTPException
 from libs.computations.gradient import gradient
 from libs.computations.laplace import (
@@ -11,12 +10,9 @@ from libs.computations.laplace import (
     InternalCondition2D,
     LaplaceSolver,
 )
-from libs.computations.potential import get_electrodes_potential_field
 from libs.shapes.arrow import Arrow
-from libs.shapes.core.enums import ShapeType
 from libs.shapes.core.shape import Shape
 from libs.shapes.ring import Ring
-from numpy.typing import NDArray
 from schemas.simulation import (
     SimulationArrowShape,
     SimulationRequest,
@@ -43,7 +39,9 @@ class SimulationService:
         for orientation, cond in self._setup_boundary_conditions(data):
             solver.add_boundary_condition(orientation, cond)
 
-        internal_condition = self._setup_internal_condition(shape, data.conductor.potential)
+        internal_condition = self._setup_internal_condition(
+            shape, data.conductor.potential
+        )
         solver.add_internal_condition(internal_condition)
 
         u = solver.solve()
@@ -114,7 +112,9 @@ class SimulationService:
             ),
             (
                 BoundaryOrientation.RIGHT,
-                BoundaryConditionData(BoundaryConditionType.DIRICHLET, positive_electrode_boundary),
+                BoundaryConditionData(
+                    BoundaryConditionType.DIRICHLET, positive_electrode_boundary
+                ),
             ),
             # (
             #     BoundaryOrientation.RIGHT,
@@ -122,7 +122,9 @@ class SimulationService:
             # ),
         ]
 
-    def _setup_internal_condition(self, shape: Shape, potential: float) -> InternalCondition2D:
+    def _setup_internal_condition(
+        self, shape: Shape, potential: float
+    ) -> InternalCondition2D:
         def cond(x: float, y: float) -> Tuple[float, bool]:
             is_inside_shape = shape.check_surface(x, y)
             if shape.check_surface(x, y):
