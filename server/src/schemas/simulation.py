@@ -62,12 +62,12 @@ class SimulationConductor(BaseModel):
 
 class SimulationElectrode(BaseModel):
     left_potential: float = Field(
-        ge=100,
+        ge=-100,
         le=100,
         description="Constant potential on the left electrode. Units: [V]",
     )
     right_potential: float = Field(
-        ge=100,
+        ge=-100,
         le=100,
         description="Constant potential on the right electrode. Units: [V]",
     )
