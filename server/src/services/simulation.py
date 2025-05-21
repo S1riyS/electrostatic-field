@@ -1,6 +1,7 @@
 from typing import List, Tuple
 
 from fastapi import HTTPException
+
 from libs.computations.gradient import gradient
 from libs.computations.laplace import (
     BoundaryConditionData,
@@ -89,37 +90,47 @@ class SimulationService:
         self,
         data: SimulationRequest,
     ) -> List[Tuple[BoundaryOrientation, BoundaryConditionData]]:
-        def zero_boundary(_: float) -> float:
-            return 0
+        def uniform_distribution_boundary(x: float) -> float:
+            x_max = data.bath.x_boundary
+            potential_low = data.electrodes.left_potential
+            potential_high = data.electrodes.right_potential
+            return potential_low + (x / x_max) * (potential_high - potential_low)
 
-        def positive_electrode_boundary(y: float) -> float:
-            if data.electrodes.y_lower <= y <= data.electrodes.y_upper:
-                return data.electrodes.potential
-            return 0
+        def left_electrode_boundary(_: float) -> float:
+            return data.electrodes.left_potential
+
+        def right_electrode_boundary(_: float) -> float:
+            return data.electrodes.right_potential
 
         return [
             (
                 BoundaryOrientation.TOP,
-                BoundaryConditionData(BoundaryConditionType.DIRICHLET, zero_boundary),
+                BoundaryConditionData(
+                    BoundaryConditionType.DIRICHLET,
+                    uniform_distribution_boundary,
+                ),
             ),
             (
                 BoundaryOrientation.BOTTOM,
-                BoundaryConditionData(BoundaryConditionType.DIRICHLET, zero_boundary),
+                BoundaryConditionData(
+                    BoundaryConditionType.DIRICHLET,
+                    uniform_distribution_boundary,
+                ),
             ),
             (
                 BoundaryOrientation.LEFT,
-                BoundaryConditionData(BoundaryConditionType.DIRICHLET, zero_boundary),
+                BoundaryConditionData(
+                    BoundaryConditionType.DIRICHLET,
+                    left_electrode_boundary,
+                ),
             ),
             (
                 BoundaryOrientation.RIGHT,
                 BoundaryConditionData(
-                    BoundaryConditionType.DIRICHLET, positive_electrode_boundary
+                    BoundaryConditionType.DIRICHLET,
+                    right_electrode_boundary,
                 ),
             ),
-            # (
-            #     BoundaryOrientation.RIGHT,
-            #     BoundaryConditionData(BoundaryConditionType.DIRICHLET, zero_boundary),
-            # ),
         ]
 
     def _setup_internal_condition(

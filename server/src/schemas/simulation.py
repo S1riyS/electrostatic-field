@@ -1,9 +1,10 @@
 import math
 from typing import List, Literal, Tuple, Union
 
-from libs.shapes.core.enums import ShapeType
 from pydantic import BaseModel, Field, model_validator
 from typing_extensions import Self
+
+from libs.shapes.core.enums import ShapeType
 
 
 class SimulationBath(BaseModel):
@@ -60,19 +61,16 @@ class SimulationConductor(BaseModel):
 
 
 class SimulationElectrode(BaseModel):
-    y_lower: float = Field(ge=0, examples=[2], description="Lower Y bound. Units: [cm]")
-    y_upper: float = Field(
-        ge=0, examples=[16], description="Upper Y bound. Units: [cm]"
+    left_potential: float = Field(
+        ge=100,
+        le=100,
+        description="Constant potential on the left electrode. Units: [V]",
     )
-    potential: float = Field(
-        gt=0, description="Constant electrode potential. Units: [V]"
+    right_potential: float = Field(
+        ge=100,
+        le=100,
+        description="Constant potential on the right electrode. Units: [V]",
     )
-
-    @model_validator(mode="after")
-    def bounds_validation(self) -> Self:
-        if self.y_lower >= self.y_upper:
-            raise ValueError("Upper bound cannot be greater than lower bound")
-        return self
 
 
 class SimulationRequest(BaseModel):
@@ -81,14 +79,6 @@ class SimulationRequest(BaseModel):
     electrodes: SimulationElectrode = Field(
         description="Electrodes data. Located at left and right side of simulation area (x=0 and x=x_boundary)"
     )
-
-    @model_validator(mode="after")
-    def electrodes_validation(self) -> Self:
-        if self.electrodes.y_upper > self.bath.y_boundary:
-            raise ValueError(
-                "Electrode upper bound cannot be greater than bath upper bound"
-            )
-        return self
 
 
 class SimulationResponse(BaseModel):
