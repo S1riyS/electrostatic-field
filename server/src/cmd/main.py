@@ -16,11 +16,11 @@ from libs.computations.laplace import (
 )
 from libs.shapes.core.shape import Shape
 from schemas.simulation import (
-    SimulationArrowShape,
     SimulationBath,
     SimulationConductor,
     SimulationElectrode,
     SimulationRequest,
+    SimulationRingShape,
 )
 from services.simulation import SimulationService
 
@@ -44,17 +44,16 @@ def __get_request() -> SimulationRequest:
             x=15,
             y=10,
             potential=7.35,
-            # shape=SimulationRingShape(inner_radius=3, outer_radius=6),
-            shape=SimulationArrowShape(
-                height=4,
-                length=6,
-                angle=0,
-            ),
+            shape=SimulationRingShape(inner_radius=3, outer_radius=6),
+            # shape=SimulationArrowShape(
+            #     height=4,
+            #     length=6,
+            #     angle=0,
+            # ),
         ),
         electrodes=SimulationElectrode(
-            y_lower=0,
-            y_upper=20,
-            potential=14,
+            left_potential=5,
+            right_potential=10,
         ),
     )
 
@@ -63,14 +62,9 @@ def __zero_boundary(_: float) -> float:
     return 0
 
 
-def __generate_electrode_condition(
-    y_lower: float, y_upper: float, potential: float
-) -> BoundaryCondition1D:
+def __generate_electrode_condition(potential: float) -> BoundaryCondition1D:
     def cond(x: float) -> float:
-        is_inside_shape = x >= y_lower and x <= y_upper
-        if is_inside_shape:
-            return potential
-        return 0
+        return potential
 
     return cond
 
@@ -111,9 +105,7 @@ def __one_electrode_conditions(
             BoundaryConditionData(
                 BoundaryConditionType.DIRICHLET,
                 __generate_electrode_condition(
-                    request.electrodes.y_lower,
-                    request.electrodes.y_upper,
-                    request.electrodes.potential,
+                    request.electrodes.right_potential,
                 ),
             ),
         ),
@@ -135,8 +127,8 @@ def __two_electrodes_conditions(
                 BoundaryConditionType.DIRICHLET,
                 __uniform_condition(
                     request.bath.x_boundary,
-                    1 * request.electrodes.potential / 4,
-                    3 * request.electrodes.potential / 4,
+                    request.electrodes.left_potential,
+                    request.electrodes.right_potential,
                 ),
             ),
         ),
@@ -146,8 +138,8 @@ def __two_electrodes_conditions(
                 BoundaryConditionType.DIRICHLET,
                 __uniform_condition(
                     request.bath.x_boundary,
-                    1 * request.electrodes.potential / 4,
-                    3 * request.electrodes.potential / 4,
+                    request.electrodes.left_potential,
+                    request.electrodes.right_potential,
                 ),
             ),
         ),
@@ -156,9 +148,7 @@ def __two_electrodes_conditions(
             BoundaryConditionData(
                 BoundaryConditionType.DIRICHLET,
                 __generate_electrode_condition(
-                    request.electrodes.y_lower,
-                    request.electrodes.y_upper,
-                    1 * request.electrodes.potential / 4,
+                    request.electrodes.left_potential,
                 ),
             ),
         ),
@@ -167,9 +157,7 @@ def __two_electrodes_conditions(
             BoundaryConditionData(
                 BoundaryConditionType.DIRICHLET,
                 __generate_electrode_condition(
-                    request.electrodes.y_lower,
-                    request.electrodes.y_upper,
-                    3 * request.electrodes.potential / 4,
+                    request.electrodes.right_potential,
                 ),
             ),
         ),
@@ -206,9 +194,10 @@ def __save_electric_lines_plot(
     X, Y = np.meshgrid(x_grid, y_grid)
     plt.figure(figsize=(25, 17.5))
 
-    plt.streamplot(X, Y, Ex, Ey, color="red", density=2, linewidth=1)
+    plt.streamplot(X, Y, -Ex, -Ey, color="red", density=2, linewidth=1)
     plt.contour(X, Y, potential, levels=20, colors="gray")
     plt.savefig(filename, bbox_inches="tight", dpi=300)
+    plt.show()
 
 
 def __save_heatmap(
@@ -248,9 +237,9 @@ def __save_heatmap(
 def main() -> None:
     # Different approaches to setup boundary conditions
     approaches: List[Tuple[str, ConditionsGeneratorFunction]] = [
-        ("one_electrode", __one_electrode_conditions),
+        # ("one_electrode", __one_electrode_conditions),
         ("two_electrodes", __two_electrodes_conditions),
-        ("separate_potentials", __separate_potentials_conditions),
+        # ("separate_potentials", __separate_potentials_conditions),
     ]
 
     # Setup core components
