@@ -21,6 +21,10 @@ from schemas.simulation import (
     SimulationRingShape,
 )
 
+# TODO: move to config or retrieve from request
+NX = 500
+NY = 500
+
 
 class SimulationService:
     async def run(self, data: SimulationRequest) -> SimulationResponse:
@@ -33,7 +37,7 @@ class SimulationService:
             )
 
         # Setup Laplce equation solver
-        plane_partition = self._setup_plane_partition(data)
+        plane_partition = self._setup_plane_partition(data, NX, NY)
         solver = LaplaceSolver(plane_partition)
 
         # Setup conditions
@@ -76,9 +80,12 @@ class SimulationService:
 
         return None
 
-    def _setup_plane_partition(self, data: SimulationRequest) -> DiscretePlanePartition:
-        Nx = 500
-        Ny = 500
+    def _setup_plane_partition(
+        self,
+        data: SimulationRequest,
+        Nx: int,
+        Ny: int,
+    ) -> DiscretePlanePartition:
         return DiscretePlanePartition(
             data.bath.x_boundary,
             Nx,

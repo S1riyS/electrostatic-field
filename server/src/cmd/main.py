@@ -1,6 +1,7 @@
 import os
 from typing import Callable, List, Tuple
 
+import mplcursors
 import numpy as np
 from matplotlib import pyplot as plt
 from numpy.typing import NDArray
@@ -28,8 +29,8 @@ ConditionsGeneratorFunction = Callable[
     [SimulationRequest], List[Tuple[BoundaryOrientation, BoundaryConditionData]]
 ]
 
-NX = 500
-NY = 500
+NX = 1000
+NY = 1000
 CALCULATED_ELECTRIC_FIELD = 47.62
 IMAGES_DIR = "images"
 
@@ -44,7 +45,7 @@ def __get_request() -> SimulationRequest:
             x=15,
             y=10,
             potential=7.35,
-            shape=SimulationRingShape(inner_radius=3, outer_radius=6),
+            shape=SimulationRingShape(inner_radius=5, outer_radius=6),
             # shape=SimulationArrowShape(
             #     height=4,
             #     length=6,
@@ -52,8 +53,8 @@ def __get_request() -> SimulationRequest:
             # ),
         ),
         electrodes=SimulationElectrode(
-            left_potential=5,
-            right_potential=10,
+            left_potential=2,
+            right_potential=14,
         ),
     )
 
@@ -188,16 +189,23 @@ def __save_electric_lines_plot(
     os.makedirs(os.path.dirname(filename), exist_ok=True)
 
     Ex, Ey = gradient_vectors(potential, width / NX, height / NY)
+    # threshold = 1e-12
+    # Ex[Ex < threshold] = 0
+    # Ey[Ey < threshold] = 0
     x_grid = np.linspace(0, width, NX)
     y_grid = np.linspace(0, height, NY)
 
     X, Y = np.meshgrid(x_grid, y_grid)
     plt.figure(figsize=(25, 17.5))
 
-    plt.streamplot(X, Y, -Ex, -Ey, color="red", density=2, linewidth=1)
+    print(f"Potential shape: {potential.shape}")
+    print(f"Grid shape: x: {X.shape}, y: {Y.shape}")
+    print(f"Ex shape: {Ex.shape}, Ey shape: {Ey.shape}")
+
+    plt.streamplot(X, Y, -Ex, -Ey, color="red", density=1, linewidth=1)
     plt.contour(X, Y, potential, levels=20, colors="gray")
     plt.savefig(filename, bbox_inches="tight", dpi=300)
-    plt.show()
+    plt.close()
 
 
 def __save_heatmap(
@@ -223,14 +231,35 @@ def __save_heatmap(
     y = np.linspace(0, partition.Ly, partition.Ny)
     X, Y = np.meshgrid(x, y)
 
-    heatmap = plt.pcolormesh(X, Y, data, shading="auto")
+    heatmap = plt.imshow(
+        data,
+        extent=[0.0, partition.Lx, 0.0, partition.Ly],
+        origin="lower",
+        aspect="auto",
+    )
     plt.colorbar(heatmap)
 
     plt.xlabel("x")
     plt.ylabel("y")
     plt.axis("equal")
 
+    # Add interactive cursor that shows values
+    cursor = mplcursors.cursor(heatmap, hover=True)
+
+    # Customize the displayed text
+    @cursor.connect("add")
+    def on_add(sel):  # type: ignore
+        i, j = sel.target.index
+        # Make sure indices are within bounds
+        i = min(max(i, 0), data.shape[0] - 1)
+        j = min(max(j, 0), data.shape[1] - 1)
+        sel.annotation.set_text(
+            f"x={X[i, j]:.2f}\ny={Y[i, j]:.2f}\nvalue={data[i, j]:.4f}"
+        )
+        sel.annotation.get_bbox_patch().set(fc="white", alpha=0.8)
+
     plt.savefig(filename, bbox_inches="tight", dpi=300)
+    plt.show()
     plt.close()
 
 
@@ -255,7 +284,7 @@ def main() -> None:
         assert shape is not None
 
         # Setup Laplce equation solver
-        partition = service._setup_plane_partition(request)
+        partition = service._setup_plane_partition(request, NX, NY)
         solver = LaplaceSolver(partition)
 
         # Setup internal condition
