@@ -233,7 +233,7 @@ def __save_heatmap(
 
     heatmap = plt.imshow(
         data,
-        extent=[0.0, partition.Lx, 0.0, partition.Ly],
+        extent=(0.0, partition.Lx, 0.0, partition.Ly),
         origin="lower",
         aspect="auto",
     )
