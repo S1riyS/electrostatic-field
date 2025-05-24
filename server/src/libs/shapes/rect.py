@@ -11,9 +11,9 @@ class Rect(Shape):
         relative_x = x - self.x
         relative_y = y - self.y
 
-        return -(self.a / 2) <= relative_x <= (self.a / 2) and -(
+        return -(self.a / 2) <= relative_x <= (self.a / 2) and -(self.b / 2) <= relative_y <= (
             self.b / 2
-        ) <= relative_y <= (self.b / 2)
+        )
 
     def check_inside(self, x: float, y: float) -> bool:
         return self.check_surface(x, y)

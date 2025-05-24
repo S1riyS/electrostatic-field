@@ -1,7 +1,7 @@
 import os
 from typing import Callable, List, Tuple
 
-import mplcursors
+import mplcursors  # type: ignore
 import numpy as np
 from matplotlib import pyplot as plt
 from numpy.typing import NDArray
@@ -253,9 +253,7 @@ def __save_heatmap(
         # Make sure indices are within bounds
         i = min(max(i, 0), data.shape[0] - 1)
         j = min(max(j, 0), data.shape[1] - 1)
-        sel.annotation.set_text(
-            f"x={X[i, j]:.2f}\ny={Y[i, j]:.2f}\nvalue={data[i, j]:.4f}"
-        )
+        sel.annotation.set_text(f"x={X[i, j]:.2f}\ny={Y[i, j]:.2f}\nvalue={data[i, j]:.4f}")
         sel.annotation.get_bbox_patch().set(fc="white", alpha=0.8)
 
     plt.savefig(filename, bbox_inches="tight", dpi=300)
@@ -288,9 +286,7 @@ def main() -> None:
         solver = LaplaceSolver(partition)
 
         # Setup internal condition
-        internal_condition = service._setup_internal_condition(
-            shape, request.conductor.potential
-        )
+        internal_condition = service._setup_internal_condition(shape, request.conductor.potential)
         solver.add_internal_condition(internal_condition)
 
         conditions = conditions_gen_fn(request)

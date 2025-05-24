@@ -2,9 +2,19 @@
   // Client
   "prettier.configPath": "client/.prettierrc",
   // Server
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit",
+    }
+  },
+  "python.envFile": "${workspaceFolder}/.env",
+  "python.analysis.typeCheckingMode": "standard",
   "python.analysis.extraPaths": [
     "${workspaceFolder}/server/src"
   ],
   "mypy.configFile": "./server/pyproject.toml",
-  "python.envFile": "${workspaceFolder}/.env"
+  "ruff.configuration": "${workspaceFolder}/server/.ruff.toml",
 }

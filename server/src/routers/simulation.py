@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from schemas.simulation import SimulationRequest, SimulationResponse
 from services.simulation import SimulationService
 
