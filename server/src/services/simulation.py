@@ -44,9 +44,7 @@ class SimulationService:
         for orientation, cond in self._setup_boundary_conditions(data):
             solver.add_boundary_condition(orientation, cond)
 
-        internal_condition = self._setup_internal_condition(
-            shape, data.conductor.potential
-        )
+        internal_condition = self._setup_internal_condition(shape, data.conductor.potential)
         solver.add_internal_condition(internal_condition)
 
         u = solver.solve()
@@ -140,9 +138,7 @@ class SimulationService:
             ),
         ]
 
-    def _setup_internal_condition(
-        self, shape: Shape, potential: float
-    ) -> InternalCondition2D:
+    def _setup_internal_condition(self, shape: Shape, potential: float) -> InternalCondition2D:
         def cond(x: float, y: float) -> Tuple[float, bool]:
             is_inside_shape = shape.check_surface(x, y)
             if shape.check_surface(x, y):

@@ -27,9 +27,7 @@ class DiscretePlanePartition:
         return self.Ly / (self.Ny - 1)
 
 
-BoundaryCondition1D = Callable[
-    [float], float
-]  # Accept 1 agrument, since second dimension is fixed
+BoundaryCondition1D = Callable[[float], float]  # Accept 1 agrument, since second dimension is fixed
 InternalCondition2D = Callable[[float, float], Tuple[float, bool]]
 
 
@@ -58,9 +56,7 @@ class LaplaceSolver:
 
     def __init__(self, partition: DiscretePlanePartition):
         self.partition = partition
-        self.boundary_conditions: Dict[
-            BoundaryOrientation, List[BoundaryConditionData]
-        ] = {
+        self.boundary_conditions: Dict[BoundaryOrientation, List[BoundaryConditionData]] = {
             BoundaryOrientation.LEFT: [],
             BoundaryOrientation.RIGHT: [],
             BoundaryOrientation.TOP: [],

@@ -5,9 +5,7 @@ from libs.shapes.core.shape import Shape
 
 
 class Arrow(Shape):
-    def __init__(
-        self, x: float, y: float, height: float, length: float, angle: float = 0
-    ):
+    def __init__(self, x: float, y: float, height: float, length: float, angle: float = 0):
         super().__init__(x, y)
         self.height = height
         self.length = length
@@ -32,9 +30,7 @@ class Arrow(Shape):
 
         # Central rect
         central_rect_length = self.length - self.height
-        in_central_rect_x = (
-            -(central_rect_length / 2) <= relative_x <= (central_rect_length / 2)
-        )
+        in_central_rect_x = -(central_rect_length / 2) <= relative_x <= (central_rect_length / 2)
         in_central_rect_y = -(self.height / 2) <= relative_y <= (self.height / 2)
         in_central_rect = in_central_rect_x and in_central_rect_y
 

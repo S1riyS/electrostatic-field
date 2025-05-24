@@ -48,15 +48,9 @@ class SimulationArrowShape(BaseModel):
 
 
 class SimulationConductor(BaseModel):
-    x: float = Field(
-        gt=1, lt=50, examples=[20], description="Position along x-axis. Units: [cm]"
-    )
-    y: float = Field(
-        gt=1, lt=50, examples=[10], description="Position along y-axis. Units: [cm]"
-    )
-    shape: Union[SimulationRingShape, SimulationArrowShape] = Field(
-        discriminator="shape_type"
-    )
+    x: float = Field(gt=1, lt=50, examples=[20], description="Position along x-axis. Units: [cm]")
+    y: float = Field(gt=1, lt=50, examples=[10], description="Position along y-axis. Units: [cm]")
+    shape: Union[SimulationRingShape, SimulationArrowShape] = Field(discriminator="shape_type")
     potential: float = Field(gt=0, examples=[7.35])
 
 
