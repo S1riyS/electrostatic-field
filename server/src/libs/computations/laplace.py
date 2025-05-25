@@ -4,8 +4,8 @@ from typing import Callable, Dict, List, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.sparse import lil_matrix  # type: ignore
-from scipy.sparse.linalg import spsolve  # type: ignore
+from scipy.sparse import lil_matrix
+from scipy.sparse.linalg import spsolve
 
 
 @dataclass(frozen=True)
