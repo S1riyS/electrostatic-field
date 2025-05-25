@@ -1,7 +1,6 @@
 import * as React from "react";
 import { Navbar as BootstrapNavbar, Container, Nav } from "react-bootstrap";
-import { CiViewTable } from "react-icons/ci";
-import { PiBezierCurve } from "react-icons/pi";
+import { TbWavesElectricity } from "react-icons/tb";
 import { Link } from "react-router";
 
 const Navbar: React.FunctionComponent = () => {
@@ -16,8 +15,12 @@ const Navbar: React.FunctionComponent = () => {
       <Container>
         <Nav.Link as={Link} to="/">
           <BootstrapNavbar.Brand>
-            <PiBezierCurve
-              style={{ fontSize: "2.5rem", verticalAlign: "middle" }}
+            <img
+              src="/logo.png"
+              width="30"
+              height="30"
+              className="d-inline-block align-top"
+              alt="Logo"
             />
           </BootstrapNavbar.Brand>
         </Nav.Link>
@@ -29,7 +32,7 @@ const Navbar: React.FunctionComponent = () => {
           <Nav className="d-flex justify-content-between flex-row w-100">
             <div className="d-flex flex-wrap">
               <Nav.Link as={Link} to="/">
-                <CiViewTable /> Главная
+                <TbWavesElectricity /> Главная
               </Nav.Link>
             </div>
           </Nav>
