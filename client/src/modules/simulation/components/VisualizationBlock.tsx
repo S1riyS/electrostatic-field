@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Card } from "react-bootstrap";
-import InteractivePlot from "./InteractivePlot";
+import InteractivePlot from "./InteractivePlot/InteractivePlot";
 
 const VisualizationBlock = () => {
   const parentRef = useRef(null);
