@@ -41,14 +41,14 @@ const SimulationParamsBlock = () => {
 
   return (
     <Card>
-      <Card.Header>Simulation Parameters</Card.Header>
+      <Card.Header>Настройки симуляции</Card.Header>
       <Card.Body>
         <Form>
-          <h5>Bath</h5>
+          <h5>Ванна</h5>
           <Row>
             <Col>
               <Form.Group>
-                <Form.Label>X Boundary (cm)</Form.Label>
+                <Form.Label>Ширина (см)</Form.Label>
                 <FloatInput
                   value={params.bath.x_boundary}
                   setValue={(value) =>
@@ -59,7 +59,7 @@ const SimulationParamsBlock = () => {
             </Col>
             <Col>
               <Form.Group>
-                <Form.Label>Y Boundary (cm)</Form.Label>
+                <Form.Label>Высота (см)</Form.Label>
                 <FloatInput
                   value={params.bath.y_boundary}
                   setValue={(value) =>
@@ -70,11 +70,11 @@ const SimulationParamsBlock = () => {
             </Col>
           </Row>
 
-          <h5 className="mt-4">Conductor</h5>
+          <h5 className="mt-4">Проводник</h5>
           <Row>
             <Col>
               <Form.Group>
-                <Form.Label>X (cm)</Form.Label>
+                <Form.Label>X (см)</Form.Label>
                 <FloatInput
                   value={params.conductor.x}
                   setValue={(value) =>
@@ -85,7 +85,7 @@ const SimulationParamsBlock = () => {
             </Col>
             <Col>
               <Form.Group>
-                <Form.Label>Y (cm)</Form.Label>
+                <Form.Label>Y (см)</Form.Label>
                 <FloatInput
                   value={params.conductor.y}
                   setValue={(value) =>
@@ -96,7 +96,7 @@ const SimulationParamsBlock = () => {
             </Col>
             <Col>
               <Form.Group>
-                <Form.Label>Potential</Form.Label>
+                <Form.Label>Потенциал</Form.Label>
                 <FloatInput
                   value={params.conductor.potential}
                   setValue={(value) =>
@@ -107,12 +107,12 @@ const SimulationParamsBlock = () => {
             </Col>
           </Row>
 
-          <h5 className="mt-4">Electrodes</h5>
-          <h6 className="text-muted">Potential</h6>
+          <h5 className="mt-4">Электроды</h5>
+          <h6 className="text-muted">Потенциал</h6>
           <Row>
             <Col>
               <Form.Group>
-                <Form.Label>Left</Form.Label>
+                <Form.Label>Левый</Form.Label>
                 <FloatInput
                   value={params.electrodes.left_potential}
                   setValue={(value) =>
@@ -123,7 +123,7 @@ const SimulationParamsBlock = () => {
             </Col>
             <Col>
               <Form.Group>
-                <Form.Label>Right</Form.Label>
+                <Form.Label>Правый</Form.Label>
                 <FloatInput
                   value={params.electrodes.right_potential}
                   setValue={(value) =>
@@ -134,17 +134,17 @@ const SimulationParamsBlock = () => {
             </Col>
           </Row>
 
-          <h5 className="mt-4">Conductor Shape</h5>
+          <h5 className="mt-4">Форма проводника</h5>
           <Form.Group>
-            <Form.Label>Shape Type</Form.Label>
+            <Form.Label>Форма</Form.Label>
             <Form.Select
               value={params.conductor.shape.shape_type}
               onChange={(e) =>
                 dispatch(setShapeType(e.target.value as ShapeType))
               }
             >
-              <option value={ShapeType.RING}>Ring</option>
-              <option value={ShapeType.ARROW}>Arrow</option>
+              <option value={ShapeType.RING}>Кольцо</option>
+              <option value={ShapeType.ARROW}>Стрелка</option>
             </Form.Select>
           </Form.Group>
 
@@ -152,7 +152,7 @@ const SimulationParamsBlock = () => {
             <Row className="mt-3">
               <Col>
                 <Form.Group>
-                  <Form.Label>Inner Radius (cm)</Form.Label>
+                  <Form.Label>Внутр. радиус (см)</Form.Label>
                   <FloatInput
                     value={params.conductor.shape.inner_radius}
                     setValue={(value) =>
@@ -163,7 +163,7 @@ const SimulationParamsBlock = () => {
               </Col>
               <Col>
                 <Form.Group>
-                  <Form.Label>Outer Radius (cm)</Form.Label>
+                  <Form.Label>Внеш. радиус (см)</Form.Label>
                   <FloatInput
                     value={params.conductor.shape.outer_radius}
                     setValue={(value) =>
@@ -180,7 +180,7 @@ const SimulationParamsBlock = () => {
               <Row className="mt-3">
                 <Col>
                   <Form.Group>
-                    <Form.Label>Height (cm)</Form.Label>
+                    <Form.Label>Высота (см)</Form.Label>
                     <FloatInput
                       value={params.conductor.shape.height}
                       setValue={(value) => handleShapeChange("height", value)}
@@ -189,7 +189,7 @@ const SimulationParamsBlock = () => {
                 </Col>
                 <Col>
                   <Form.Group>
-                    <Form.Label>Length (cm)</Form.Label>
+                    <Form.Label>Длина (см)</Form.Label>
                     <FloatInput
                       value={params.conductor.shape.length}
                       setValue={(value) => handleShapeChange("length", value)}
@@ -198,7 +198,7 @@ const SimulationParamsBlock = () => {
                 </Col>
               </Row>
               <Row className="mt-3">
-                <Form.Label>Angle (rad)</Form.Label>
+                <Form.Label>Угол (рад)</Form.Label>
                 <Col>
                   <Form.Group>
                     <Form.Range

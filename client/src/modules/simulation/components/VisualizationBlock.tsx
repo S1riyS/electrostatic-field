@@ -22,7 +22,7 @@ const VisualizationBlock = () => {
   return (
     <Card>
       <Card.Header>
-        <Card.Title>Visualization</Card.Title>
+        <Card.Title>Визуализация</Card.Title>
       </Card.Header>
       <Card.Body ref={parentRef}>
         {/* {result ? <SimulationPlot result={result} /> : <>no results</>} */}

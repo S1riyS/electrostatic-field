@@ -74,14 +74,14 @@ const simulationSlice = createSlice({
         state.params.conductor.shape = {
           shape_type: action.payload,
           angle: 0,
-          height: 0,
-          length: 0,
+          height: 4,
+          length: 8,
         };
       } else if (action.payload === ShapeType.RING) {
         state.params.conductor.shape = {
           shape_type: action.payload,
-          inner_radius: 0,
-          outer_radius: 0,
+          inner_radius: 4,
+          outer_radius: 8,
         };
       }
     },

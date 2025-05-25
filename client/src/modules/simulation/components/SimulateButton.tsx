@@ -20,7 +20,7 @@ const SimulateButton = () => {
 
   return (
     <LoadingButton isLoading={isLoading} onClick={submit}>
-      Run
+      Запуск
     </LoadingButton>
   );
 };
