@@ -52,7 +52,7 @@ class SimulationService:
 
         u = solver.solve()
 
-        return self._render_solution(u, plane_partition)
+        return self._render_solution(u, plane_partition, shape)
 
     def _retrieve_shape(self, data: SimulationRequest) -> Shape | None:
         if isinstance(data.conductor.shape, SimulationRingShape):
@@ -149,6 +149,7 @@ class SimulationService:
         self,
         potential: NDArray[np.float64],
         partition: DiscretePlanePartition,
+        shape: Shape,
     ) -> io.BytesIO:
         """Renders the solution to an image file and returns it as bytes."""
         # Get X and Y components of the electric field vector field
@@ -157,10 +158,22 @@ class SimulationService:
         y_grid = np.linspace(0, partition.Ly, NY)
 
         # Create figure
-        _, ax = plt.subplots(figsize=(partition.Lx, partition.Ly))
+        k = 20 / partition.Lx
+        _, ax = plt.subplots(figsize=(partition.Lx * k, partition.Ly * k))
 
-        # Draw plots
+        # Meshgrid
         X, Y = np.meshgrid(x_grid, y_grid)
+
+        # Create surface mask using vectorized operation
+        surface_mask = np.vectorize(shape.check_surface)(X, Y)
+        # 1. Filled background for shape
+        ax.contourf(X, Y, surface_mask, levels=[0.5, 1.5], colors=["none", "#1f77b4"], alpha=0.1)
+        # 2. Smooth boundary line
+        boundary = np.zeros_like(surface_mask, dtype=float)
+        boundary[surface_mask] = 1
+        ax.contour(X, Y, boundary, levels=[0.5], colors="#1f77b4", linewidths=1.5, alpha=0.7)
+
+        # Electric field and potential plots
         ax.streamplot(X, Y, -Ex, -Ey, color="red", density=1, linewidth=1)
         ax.contour(X, Y, potential, levels=20, colors="gray")
 
