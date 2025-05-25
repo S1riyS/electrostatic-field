@@ -1,8 +1,12 @@
+import io
 from typing import List, Tuple
 
+import numpy as np
 from fastapi import HTTPException
+from matplotlib import pyplot as plt
+from numpy.typing import NDArray
 
-from libs.computations.gradient import gradient
+from libs.computations.gradient import gradient_vectors
 from libs.computations.laplace import (
     BoundaryConditionData,
     BoundaryConditionType,
@@ -17,7 +21,6 @@ from libs.shapes.ring import Ring
 from schemas.simulation import (
     SimulationArrowShape,
     SimulationRequest,
-    SimulationResponse,
     SimulationRingShape,
 )
 
@@ -27,7 +30,7 @@ NY = 500
 
 
 class SimulationService:
-    async def run(self, data: SimulationRequest) -> SimulationResponse:
+    async def run(self, data: SimulationRequest) -> io.BytesIO:
         # Retrieve shape
         shape = self._retrieve_shape(data)
         if shape is None:
@@ -49,15 +52,7 @@ class SimulationService:
 
         u = solver.solve()
 
-        potential: List[List[float]] = u.tolist()
-        electric_field: List[List[Tuple[float, float]]] = (
-            -gradient(u, plane_partition.dx, plane_partition.dy)
-        ).tolist()
-
-        return SimulationResponse(
-            potential=potential,
-            electric_field=electric_field,
-        )
+        return self._render_solution(u, plane_partition)
 
     def _retrieve_shape(self, data: SimulationRequest) -> Shape | None:
         if isinstance(data.conductor.shape, SimulationRingShape):
@@ -149,3 +144,34 @@ class SimulationService:
             return value, is_inside_shape
 
         return cond
+
+    def _render_solution(
+        self,
+        potential: NDArray[np.float64],
+        partition: DiscretePlanePartition,
+    ) -> io.BytesIO:
+        """Renders the solution to an image file and returns it as bytes."""
+        # Get X and Y components of the electric field vector field
+        Ex, Ey = gradient_vectors(potential, partition.dx, partition.dy)
+        x_grid = np.linspace(0, partition.Lx, NX)
+        y_grid = np.linspace(0, partition.Ly, NY)
+
+        # Create figure
+        _, ax = plt.subplots(figsize=(partition.Lx, partition.Ly))
+
+        # Draw plots
+        X, Y = np.meshgrid(x_grid, y_grid)
+        ax.streamplot(X, Y, -Ex, -Ey, color="red", density=1, linewidth=1)
+        ax.contour(X, Y, potential, levels=20, colors="gray")
+
+        # Figure settings
+        ax.set_axis_off()  # Remove all axes and borders
+        ax.set_position((0, 0, 1, 1))  # Fill the entire figure
+
+        # Save to BytesIO
+        buf = io.BytesIO()
+        plt.savefig(buf, format="png", bbox_inches="tight", pad_inches=0, dpi=300, transparent=True)
+        plt.close()
+        buf.seek(0)
+
+        return buf
