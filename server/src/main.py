@@ -8,6 +8,7 @@ from routers import api_router
 app = FastAPI()
 
 origins = cfg.allowed_origins.split(",")
+print(origins)
 
 app.add_middleware(
     CORSMiddleware,

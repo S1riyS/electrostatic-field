@@ -16,6 +16,7 @@ from libs.computations.laplace import (
     LaplaceSolver,
 )
 from libs.shapes.core.shape import Shape
+from libs.shapes.rect import Rect
 from schemas.simulation import (
     SimulationBath,
     SimulationConductor,
@@ -47,9 +48,9 @@ def __get_request() -> SimulationRequest:
             potential=7.35,
             shape=SimulationRingShape(inner_radius=0, outer_radius=4),
             # shape=SimulationArrowShape(
-            #     height=4,
-            #     length=6,
-            #     angle=0,
+            # height=4,
+            # length=6,
+            # angle=0,
             # ),
         ),
         electrodes=SimulationElectrode(
@@ -57,10 +58,6 @@ def __get_request() -> SimulationRequest:
             right_potential=14,
         ),
     )
-
-
-def __zero_boundary(_: float) -> float:
-    return 0
 
 
 def __generate_electrode_condition(potential: float) -> BoundaryCondition1D:
@@ -79,38 +76,6 @@ def __uniform_condition(
         return potential_low + (x / x_max) * (potential_high - potential_low)
 
     return cond
-
-
-def __one_electrode_conditions(
-    request: SimulationRequest,
-) -> List[Tuple[BoundaryOrientation, BoundaryConditionData]]:
-    """
-    Boundary conditions for simulation when potential of positive electrode has potential specified in request
-    and zero in negative electrode
-    """
-    return [
-        (
-            BoundaryOrientation.TOP,
-            BoundaryConditionData(BoundaryConditionType.DIRICHLET, __zero_boundary),
-        ),
-        (
-            BoundaryOrientation.BOTTOM,
-            BoundaryConditionData(BoundaryConditionType.DIRICHLET, __zero_boundary),
-        ),
-        (
-            BoundaryOrientation.LEFT,
-            BoundaryConditionData(BoundaryConditionType.DIRICHLET, __zero_boundary),
-        ),
-        (
-            BoundaryOrientation.RIGHT,
-            BoundaryConditionData(
-                BoundaryConditionType.DIRICHLET,
-                __generate_electrode_condition(
-                    request.electrodes.right_potential,
-                ),
-            ),
-        ),
-    ]
 
 
 def __two_electrodes_conditions(
@@ -165,15 +130,6 @@ def __two_electrodes_conditions(
     ]
 
 
-def __separate_potentials_conditions(
-    request: SimulationRequest,
-) -> List[Tuple[BoundaryOrientation, BoundaryConditionData]]:
-    """
-    Boundary conditions for simulation when potential of conductor and potential of electrodes are calculated separately
-    """
-    return []
-
-
 def __apply_electrodes_potential(
     x: float, y: float, shape: Shape, electric_field_value: float
 ) -> float:
@@ -219,7 +175,7 @@ def __save_electric_lines_plot(
         -Ex,
         -Ey,
         color="red",
-        density=0.75,
+        density=(0.25, 0.8),
         linewidth=1,
         broken_streamlines=False,
     )
@@ -283,16 +239,14 @@ def __save_heatmap(
         sel.annotation.get_bbox_patch().set(fc="white", alpha=0.8)
 
     plt.savefig(filename, bbox_inches="tight", dpi=300)
-    # plt.show()
+    plt.show()
     plt.close()
 
 
 def main() -> None:
     # Different approaches to setup boundary conditions
     approaches: List[Tuple[str, ConditionsGeneratorFunction]] = [
-        # ("one_electrode", __one_electrode_conditions),
         ("two_electrodes", __two_electrodes_conditions),
-        # ("separate_potentials", __separate_potentials_conditions),
     ]
 
     # Setup core components
@@ -304,16 +258,16 @@ def main() -> None:
         print(f"Running simulation with {approach_name} approach")
 
         # Retrieve shape
-        shape = service._retrieve_shape(request)
+        # shape = service._retrieve_shape(request)
+        shape = Rect(15, 10, 5, 5)
         assert shape is not None
 
         # Setup Laplce equation solver
         partition = service._setup_plane_partition(request, NX, NY)
         solver = LaplaceSolver(partition)
 
-        # Setup internal condition
-        internal_condition = service._setup_internal_condition(shape, request.conductor.potential)
-        solver.add_internal_condition(internal_condition)
+        # Setup const region
+        solver.add_const_region(shape)
 
         conditions = conditions_gen_fn(request)
         for orientation, cond in conditions:

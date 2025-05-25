@@ -12,7 +12,6 @@ from libs.computations.laplace import (
     BoundaryConditionType,
     BoundaryOrientation,
     DiscretePlanePartition,
-    InternalCondition2D,
     LaplaceSolver,
 )
 from libs.shapes.arrow import Arrow
@@ -25,8 +24,8 @@ from schemas.simulation import (
 )
 
 # TODO: move to config or retrieve from request
-NX = 500
-NY = 500
+NX = 375
+NY = 375
 
 
 class SimulationService:
@@ -43,12 +42,12 @@ class SimulationService:
         plane_partition = self._setup_plane_partition(data, NX, NY)
         solver = LaplaceSolver(plane_partition)
 
-        # Setup conditions
+        # Boudary conditions
         for orientation, cond in self._setup_boundary_conditions(data):
             solver.add_boundary_condition(orientation, cond)
 
-        internal_condition = self._setup_internal_condition(shape, data.conductor.potential)
-        solver.add_internal_condition(internal_condition)
+        # Const regions (conductors in this case)
+        solver.add_const_region(shape)
 
         u = solver.solve()
 
@@ -132,18 +131,6 @@ class SimulationService:
                 ),
             ),
         ]
-
-    def _setup_internal_condition(self, shape: Shape, potential: float) -> InternalCondition2D:
-        def cond(x: float, y: float) -> Tuple[float, bool]:
-            is_inside_shape = shape.check_surface(x, y)
-            if shape.check_surface(x, y):
-                value = potential
-            else:
-                value = 0
-
-            return value, is_inside_shape
-
-        return cond
 
     def _render_solution(
         self,
