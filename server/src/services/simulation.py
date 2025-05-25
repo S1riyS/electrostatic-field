@@ -164,15 +164,6 @@ class SimulationService:
         # Meshgrid
         X, Y = np.meshgrid(x_grid, y_grid)
 
-        # Create surface mask using vectorized operation
-        surface_mask = np.vectorize(shape.check_surface)(X, Y)
-        # 1. Filled background for shape
-        ax.contourf(X, Y, surface_mask, levels=[0.5, 1.5], colors=["none", "#1f77b4"], alpha=0.1)
-        # 2. Smooth boundary line
-        boundary = np.zeros_like(surface_mask, dtype=float)
-        boundary[surface_mask] = 1
-        ax.contour(X, Y, boundary, levels=[0.5], colors="#1f77b4", linewidths=1.5, alpha=0.7)
-
         # Electric field and potential plots
         ax.streamplot(X, Y, -Ex, -Ey, color="red", density=1, linewidth=1)
         ax.contour(X, Y, potential, levels=20, colors="gray")
