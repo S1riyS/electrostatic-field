@@ -92,8 +92,8 @@ const Arrow: React.FC<ArrowProps> = ({
   );
   const rotatedPoints = useMemo(() => {
     const angleRad = angle; // angle should be in radians
-    const cosA = Math.cos(angleRad);
-    const sinA = Math.sin(angleRad);
+    const cosA = Math.cos(-angleRad);
+    const sinA = Math.sin(-angleRad);
 
     return points.map(({ x, y }) => ({
       x: x * cosA - y * sinA,
