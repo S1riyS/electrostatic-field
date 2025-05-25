@@ -32,8 +32,11 @@ export type SimulationParams = {
     shape: RingShape | ArrowShape;
   };
   electrodes: {
-    y_lower: number; // in cm
-    y_upper: number; // in cm
-    potential: number;
+    left_potential: number;
+    right_potential: number;
   };
+};
+
+export type SimulationResult = {
+  imageUrl: string;
 };

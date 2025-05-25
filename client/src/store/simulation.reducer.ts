@@ -1,16 +1,16 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { SimulationResponse } from "src/modules/simulation/api/types";
 
 import {
   ArrowShape,
   RingShape,
   ShapeType,
   SimulationParams,
+  SimulationResult,
 } from "src/modules/simulation/types";
 
 type SimulationState = {
   params: SimulationParams;
-  result: SimulationResponse | null;
+  result: SimulationResult | null;
 };
 
 const initialState: SimulationState = {
@@ -23,17 +23,21 @@ const initialState: SimulationState = {
       x: 15,
       y: 10,
       potential: 7.35,
+      // shape: {
+      //   shape_type: ShapeType.ARROW,
+      //   angle: Math.PI / 4,
+      //   height: 4,
+      //   length: 8,
+      // },
       shape: {
-        shape_type: ShapeType.ARROW,
-        angle: Math.PI / 4,
-        height: 4,
-        length: 8,
+        shape_type: ShapeType.RING,
+        inner_radius: 4,
+        outer_radius: 8,
       },
     },
     electrodes: {
-      y_lower: 3,
-      y_upper: 17,
-      potential: 14,
+      left_potential: -7,
+      right_potential: 7,
     },
   },
   result: null,
@@ -54,6 +58,10 @@ const simulationSlice = createSlice({
       action: PayloadAction<SimulationParams["conductor"]>,
     ) {
       state.params.conductor = action.payload;
+    },
+    setConductorCoords(state, action: PayloadAction<{ x: number; y: number }>) {
+      state.params.conductor.x = action.payload.x;
+      state.params.conductor.y = action.payload.y;
     },
     updateElectrodes(
       state,
@@ -80,7 +88,7 @@ const simulationSlice = createSlice({
     setShape(state, action: PayloadAction<RingShape | ArrowShape>) {
       state.params.conductor.shape = action.payload;
     },
-    setResult(state, action: PayloadAction<SimulationResponse>) {
+    setResult(state, action: PayloadAction<SimulationResult>) {
       state.result = action.payload;
     },
   },
@@ -93,6 +101,7 @@ export const {
   setShapeType,
   updateConductor,
   updateElectrodes,
+  setConductorCoords,
   setResult,
 } = simulationSlice.actions;
 export default simulationSlice.reducer;

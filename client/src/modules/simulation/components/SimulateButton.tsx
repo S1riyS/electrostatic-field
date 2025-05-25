@@ -14,7 +14,6 @@ const SimulateButton = () => {
     fetch(params)
       .unwrap()
       .then((res) => {
-        console.log("res", res);
         dispatch(setResult(res));
       });
   }, [fetch, params, dispatch]);

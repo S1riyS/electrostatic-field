@@ -1,5 +1,6 @@
 import { Card, Col, Form, Row } from "react-bootstrap";
 import { useSelector } from "react-redux";
+import FloatInput from "src/modules/common/components/FloatInput";
 import { ShapeType, SimulationParams } from "src/modules/simulation/types";
 import { RootState, useAppDispatch } from "src/store";
 import {
@@ -48,15 +49,10 @@ const SimulationParamsBlock = () => {
             <Col>
               <Form.Group>
                 <Form.Label>X Boundary (cm)</Form.Label>
-                <Form.Control
-                  type="number"
+                <FloatInput
                   value={params.bath.x_boundary}
-                  onChange={(e) =>
-                    handleInputChange(
-                      "bath",
-                      "x_boundary",
-                      Number(e.target.value),
-                    )
+                  setValue={(value) =>
+                    handleInputChange("bath", "x_boundary", value)
                   }
                 />
               </Form.Group>
@@ -64,15 +60,10 @@ const SimulationParamsBlock = () => {
             <Col>
               <Form.Group>
                 <Form.Label>Y Boundary (cm)</Form.Label>
-                <Form.Control
-                  type="number"
+                <FloatInput
                   value={params.bath.y_boundary}
-                  onChange={(e) =>
-                    handleInputChange(
-                      "bath",
-                      "y_boundary",
-                      Number(e.target.value),
-                    )
+                  setValue={(value) =>
+                    handleInputChange("bath", "y_boundary", value)
                   }
                 />
               </Form.Group>
@@ -83,24 +74,22 @@ const SimulationParamsBlock = () => {
           <Row>
             <Col>
               <Form.Group>
-                <Form.Label>X Position (cm)</Form.Label>
-                <Form.Control
-                  type="number"
+                <Form.Label>X (cm)</Form.Label>
+                <FloatInput
                   value={params.conductor.x}
-                  onChange={(e) =>
-                    handleInputChange("conductor", "x", Number(e.target.value))
+                  setValue={(value) =>
+                    handleInputChange("conductor", "x", value)
                   }
                 />
               </Form.Group>
             </Col>
             <Col>
               <Form.Group>
-                <Form.Label>Y Position (cm)</Form.Label>
-                <Form.Control
-                  type="number"
+                <Form.Label>Y (cm)</Form.Label>
+                <FloatInput
                   value={params.conductor.y}
-                  onChange={(e) =>
-                    handleInputChange("conductor", "y", Number(e.target.value))
+                  setValue={(value) =>
+                    handleInputChange("conductor", "y", value)
                   }
                 />
               </Form.Group>
@@ -108,15 +97,10 @@ const SimulationParamsBlock = () => {
             <Col>
               <Form.Group>
                 <Form.Label>Potential</Form.Label>
-                <Form.Control
-                  type="number"
+                <FloatInput
                   value={params.conductor.potential}
-                  onChange={(e) =>
-                    handleInputChange(
-                      "conductor",
-                      "potential",
-                      Number(e.target.value),
-                    )
+                  setValue={(value) =>
+                    handleInputChange("conductor", "potential", value)
                   }
                 />
               </Form.Group>
@@ -124,51 +108,26 @@ const SimulationParamsBlock = () => {
           </Row>
 
           <h5 className="mt-4">Electrodes</h5>
+          <h6 className="text-muted">Potential</h6>
           <Row>
             <Col>
               <Form.Group>
-                <Form.Label>Y Lower (cm)</Form.Label>
-                <Form.Control
-                  type="number"
-                  value={params.electrodes.y_lower}
-                  onChange={(e) =>
-                    handleInputChange(
-                      "electrodes",
-                      "y_lower",
-                      Number(e.target.value),
-                    )
+                <Form.Label>Left</Form.Label>
+                <FloatInput
+                  value={params.electrodes.left_potential}
+                  setValue={(value) =>
+                    handleInputChange("electrodes", "left_potential", value)
                   }
                 />
               </Form.Group>
             </Col>
             <Col>
               <Form.Group>
-                <Form.Label>Y Upper (cm)</Form.Label>
-                <Form.Control
-                  type="number"
-                  value={params.electrodes.y_upper}
-                  onChange={(e) =>
-                    handleInputChange(
-                      "electrodes",
-                      "y_upper",
-                      Number(e.target.value),
-                    )
-                  }
-                />
-              </Form.Group>
-            </Col>
-            <Col>
-              <Form.Group>
-                <Form.Label>Potential</Form.Label>
-                <Form.Control
-                  type="number"
-                  value={params.electrodes.potential}
-                  onChange={(e) =>
-                    handleInputChange(
-                      "electrodes",
-                      "potential",
-                      Number(e.target.value),
-                    )
+                <Form.Label>Right</Form.Label>
+                <FloatInput
+                  value={params.electrodes.right_potential}
+                  setValue={(value) =>
+                    handleInputChange("electrodes", "right_potential", value)
                   }
                 />
               </Form.Group>
@@ -194,11 +153,10 @@ const SimulationParamsBlock = () => {
               <Col>
                 <Form.Group>
                   <Form.Label>Inner Radius (cm)</Form.Label>
-                  <Form.Control
-                    type="number"
+                  <FloatInput
                     value={params.conductor.shape.inner_radius}
-                    onChange={(e) =>
-                      handleShapeChange("inner_radius", Number(e.target.value))
+                    setValue={(value) =>
+                      handleShapeChange("inner_radius", value)
                     }
                   />
                 </Form.Group>
@@ -206,11 +164,10 @@ const SimulationParamsBlock = () => {
               <Col>
                 <Form.Group>
                   <Form.Label>Outer Radius (cm)</Form.Label>
-                  <Form.Control
-                    type="number"
+                  <FloatInput
                     value={params.conductor.shape.outer_radius}
-                    onChange={(e) =>
-                      handleShapeChange("outer_radius", Number(e.target.value))
+                    setValue={(value) =>
+                      handleShapeChange("outer_radius", value)
                     }
                   />
                 </Form.Group>
@@ -223,36 +180,27 @@ const SimulationParamsBlock = () => {
               <Col>
                 <Form.Group>
                   <Form.Label>Height (cm)</Form.Label>
-                  <Form.Control
-                    type="number"
+                  <FloatInput
                     value={params.conductor.shape.height}
-                    onChange={(e) =>
-                      handleShapeChange("height", Number(e.target.value))
-                    }
+                    setValue={(value) => handleShapeChange("height", value)}
                   />
                 </Form.Group>
               </Col>
               <Col>
                 <Form.Group>
                   <Form.Label>Length (cm)</Form.Label>
-                  <Form.Control
-                    type="number"
+                  <FloatInput
                     value={params.conductor.shape.length}
-                    onChange={(e) =>
-                      handleShapeChange("length", Number(e.target.value))
-                    }
+                    setValue={(value) => handleShapeChange("length", value)}
                   />
                 </Form.Group>
               </Col>
               <Col>
                 <Form.Group>
                   <Form.Label>Angle (rad)</Form.Label>
-                  <Form.Control
-                    type="number"
+                  <FloatInput
                     value={params.conductor.shape.angle}
-                    onChange={(e) =>
-                      handleShapeChange("angle", Number(e.target.value))
-                    }
+                    setValue={(value) => handleShapeChange("angle", value)}
                   />
                 </Form.Group>
               </Col>
