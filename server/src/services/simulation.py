@@ -57,18 +57,18 @@ class SimulationService:
     def _retrieve_shape(self, data: SimulationRequest) -> Shape | None:
         if isinstance(data.conductor.shape, SimulationRingShape):
             return Ring(
-                data.conductor.x,
-                data.conductor.y,
-                data.conductor.shape.inner_radius,
-                data.conductor.shape.outer_radius,
+                x=data.conductor.x,
+                y=data.conductor.y,
+                inner_radius=0,  # * Inner radius is 0 by default (doesn't affect physics)
+                outer_radius=data.conductor.shape.outer_radius,
             )
         elif isinstance(data.conductor.shape, SimulationArrowShape):
             return Arrow(
-                data.conductor.x,
-                data.conductor.y,
-                data.conductor.shape.height,
-                data.conductor.shape.length,
-                data.conductor.shape.angle,
+                x=data.conductor.x,
+                y=data.conductor.y,
+                height=data.conductor.shape.height,
+                length=data.conductor.shape.length,
+                angle=data.conductor.shape.angle,
             )
 
         return None
