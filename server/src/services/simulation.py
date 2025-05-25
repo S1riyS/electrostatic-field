@@ -165,7 +165,16 @@ class SimulationService:
         X, Y = np.meshgrid(x_grid, y_grid)
 
         # Electric field and potential plots
-        ax.streamplot(X, Y, -Ex, -Ey, color="red", density=1, linewidth=1)
+        ax.streamplot(
+            X,
+            Y,
+            -Ex,
+            -Ey,
+            color="red",
+            density=(0.25, 0.8),
+            linewidth=1,
+            broken_streamlines=False,
+        )
         ax.contour(X, Y, potential, levels=20, colors="gray")
 
         # Figure settings
