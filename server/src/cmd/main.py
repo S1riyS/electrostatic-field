@@ -29,8 +29,8 @@ ConditionsGeneratorFunction = Callable[
     [SimulationRequest], List[Tuple[BoundaryOrientation, BoundaryConditionData]]
 ]
 
-NX = 1000
-NY = 1000
+NX = 500
+NY = 500
 CALCULATED_ELECTRIC_FIELD = 47.62
 IMAGES_DIR = "images"
 
@@ -45,7 +45,7 @@ def __get_request() -> SimulationRequest:
             x=15,
             y=10,
             potential=7.35,
-            shape=SimulationRingShape(inner_radius=5, outer_radius=6),
+            shape=SimulationRingShape(inner_radius=0, outer_radius=4),
             # shape=SimulationArrowShape(
             #     height=4,
             #     length=6,
@@ -184,27 +184,53 @@ def __apply_electrodes_potential(
 
 
 def __save_electric_lines_plot(
-    potential: NDArray[np.float64], width: float, height: float, filename: str
+    potential: NDArray[np.float64],
+    width: float,
+    height: float,
+    filename: str,
+    shape: Shape,
 ) -> None:
     os.makedirs(os.path.dirname(filename), exist_ok=True)
 
     Ex, Ey = gradient_vectors(potential, width / NX, height / NY)
-    # threshold = 1e-12
-    # Ex[Ex < threshold] = 0
-    # Ey[Ey < threshold] = 0
+
     x_grid = np.linspace(0, width, NX)
     y_grid = np.linspace(0, height, NY)
 
     X, Y = np.meshgrid(x_grid, y_grid)
-    plt.figure(figsize=(25, 17.5))
 
-    print(f"Potential shape: {potential.shape}")
-    print(f"Grid shape: x: {X.shape}, y: {Y.shape}")
-    print(f"Ex shape: {Ex.shape}, Ey shape: {Ey.shape}")
+    # Create surface mask using vectorized operation
+    surface_mask = np.vectorize(shape.check_surface)(X, Y)
 
-    plt.streamplot(X, Y, -Ex, -Ey, color="red", density=1, linewidth=1)
-    plt.contour(X, Y, potential, levels=20, colors="gray")
-    plt.savefig(filename, bbox_inches="tight", dpi=300)
+    fig, ax = plt.subplots(figsize=(15, 10))
+
+    # 1. Filled background for shape
+    ax.contourf(X, Y, surface_mask, levels=[0.5, 1.5], colors=["none", "#1f77b4"], alpha=0.1)
+
+    # 2. Smooth boundary line
+    boundary = np.zeros_like(surface_mask, dtype=float)
+    boundary[surface_mask] = 1
+    ax.contour(X, Y, boundary, levels=[0.5], colors="#1f77b4", linewidths=1.5, alpha=0.7)
+
+    # Original electric field and potential plots
+    ax.streamplot(
+        X,
+        Y,
+        -Ex,
+        -Ey,
+        color="red",
+        density=0.75,
+        linewidth=1,
+        broken_streamlines=False,
+    )
+    ax.contour(X, Y, potential, levels=20, colors="gray", alpha=0.5)
+
+    # Remove axes and borders
+    ax.set_axis_off()
+    ax.set_position((0, 0, 1, 1))
+
+    # Save with high quality
+    plt.savefig(filename, bbox_inches="tight", pad_inches=0, dpi=300, transparent=True)
     plt.close()
 
 
@@ -257,7 +283,7 @@ def __save_heatmap(
         sel.annotation.get_bbox_patch().set(fc="white", alpha=0.8)
 
     plt.savefig(filename, bbox_inches="tight", dpi=300)
-    plt.show()
+    # plt.show()
     plt.close()
 
 
@@ -324,6 +350,7 @@ def main() -> None:
             width=30,
             height=20,
             filename=f"{IMAGES_DIR}/{approach_name}/potential_lines.png",
+            shape=shape,
         )
 
         __save_heatmap(
