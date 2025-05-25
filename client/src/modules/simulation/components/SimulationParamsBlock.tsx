@@ -176,35 +176,52 @@ const SimulationParamsBlock = () => {
           )}
 
           {params.conductor.shape.shape_type === ShapeType.ARROW && (
-            <Row className="mt-3">
-              <Col>
-                <Form.Group>
-                  <Form.Label>Height (cm)</Form.Label>
-                  <FloatInput
-                    value={params.conductor.shape.height}
-                    setValue={(value) => handleShapeChange("height", value)}
-                  />
-                </Form.Group>
-              </Col>
-              <Col>
-                <Form.Group>
-                  <Form.Label>Length (cm)</Form.Label>
-                  <FloatInput
-                    value={params.conductor.shape.length}
-                    setValue={(value) => handleShapeChange("length", value)}
-                  />
-                </Form.Group>
-              </Col>
-              <Col>
-                <Form.Group>
-                  <Form.Label>Angle (rad)</Form.Label>
-                  <FloatInput
-                    value={params.conductor.shape.angle}
-                    setValue={(value) => handleShapeChange("angle", value)}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
+            <>
+              <Row className="mt-3">
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Height (cm)</Form.Label>
+                    <FloatInput
+                      value={params.conductor.shape.height}
+                      setValue={(value) => handleShapeChange("height", value)}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Length (cm)</Form.Label>
+                    <FloatInput
+                      value={params.conductor.shape.length}
+                      setValue={(value) => handleShapeChange("length", value)}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Row className="mt-3">
+                <Form.Label>Angle (rad)</Form.Label>
+                <Col>
+                  <Form.Group>
+                    <Form.Range
+                      min={0}
+                      max={Math.PI * 2}
+                      step={0.01}
+                      value={params.conductor.shape.angle}
+                      onChange={(e) =>
+                        handleShapeChange("angle", parseFloat(e.target.value))
+                      }
+                    />
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group>
+                    <FloatInput
+                      value={params.conductor.shape.angle}
+                      setValue={(value) => handleShapeChange("angle", value)}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+            </>
           )}
         </Form>
       </Card.Body>
