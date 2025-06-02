@@ -15,8 +15,11 @@
 0. Клонирование исходного кода: `git clone https://github.com/S1riyS/electrostatic-field.git`
 1. Клиент (в директории `client`):
 	1. **Установка зависимостей**: `npm install`
-	2. **Конфигурация**: cоздать конфигурационный файл `.env.development` с содержанием ```VITE_API_BASE_URL=http://localhost:8000```
-	3. **Запуск**: `npm run dev`
+   	2. **Конфигурация**: cоздать конфигурационный файл `.env.development` с содержанием 
+   		```env
+      	VITE_API_BASE_URL=http://localhost:8000
+   		```
+	2. **Запуск**: `npm run dev`
 2. Сервер (в директории `server`):
 	1. **Установка зависимостей** и создание окружения: `poetry install`
 	2. **Конфигурация**: cоздать конфигурационный файл `.env` с содержанием
